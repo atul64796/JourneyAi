@@ -21,6 +21,7 @@ const storySchema = new mongoose.Schema(
       activities: [String],
       tone: { type: String, default: 'adventurous' },
       heroName: { type: String, default: 'Alex' },
+      villain: {type: String, default: 'Debjit'},
     },
     prompt: {
       type: String,
