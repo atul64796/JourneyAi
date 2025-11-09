@@ -1,47 +1,32 @@
-import mongoose from 'mongoose';
+// models/storyModel.js
+const mongoose = require('mongoose');
 
-const storySchema = new mongoose.Schema(
-  {
-    userId: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-      default: null,
-    },
-    title: {
-      type: String,
-    },
-    destination: {
-      type: String,
-    },
-    inputs: {
-      days: {
-        type: Number,
-        default: 1,
-      },
-      activities: [String],
-      tone: { type: String, default: 'adventurous' },
-      heroName: { type: String, default: 'Alex' },
-      villain: {type: String, default: 'Debjit'},
-    },
-    prompt: {
-      type: String,
-    },
-    resultText: {
-      type: String,
-    },
-    parsedOutput: {
-      type: Schema.Types.Mixed,
-    },
-    public: {
-      type: Boolean,
-      default: false,
-    },
-    likes: {
-      type: Number,
-      default: 0,
-    },
+const storySchema = new mongoose.Schema({
+  destination: {
+    type: String,
+    required: true,
+    trim: true,
   },
-  { timestamps: true }
-);
+  duration: {
+    type: String,
+    required: true,
+  },
+  mood: {
+    type: String,
+    required: true,
+  },
+  storyText: {
+    type: String,
+    required: true,
+  },
+  imageUrl: {
+    type: String,
+    default: '',
+  },
+  audioUrl: {
+    type: String,
+    default: '',
+  }
+},{timestamps:true});
 
-export default mongoose.model('Story', storySchema);
+module.exports = mongoose.model('Story', storySchema);
