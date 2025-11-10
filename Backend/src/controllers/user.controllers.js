@@ -12,7 +12,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
     try {
         const user = await User.findById(userId);
         const accessToken = user.generateAccessToken();
-        const refreshToken = user.generateAccessToken();
+        const refreshToken = user.generateRefreshToken();
         user.refreshToken = refreshToken;
         user.save({validateBeforeSave:false})
 
@@ -21,8 +21,6 @@ const generateAccessAndRefreshTokens = async (userId) => {
         throw new ApiError(500, "Something went wrong while generating");
     }
 }
-
-
 
 
 const registerUser = asyncHandler(async (req,res) => {
@@ -110,7 +108,6 @@ const loginUser = asyncHandler(async (req, res) => {
   //password check
   //acess and refress token
   //send cookie
-
   //req body  -> data
   const { username, password, email } = req.body;
   console.log(req.body);
@@ -154,7 +151,7 @@ const loginUser = asyncHandler(async (req, res) => {
     .cookie("refreshToken", acessToken, options)
     .json(
       new ApiResponse(
-        200,
+        200, //success
         {
           user: loggedinUser,
           acessToken,

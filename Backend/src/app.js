@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import User from './routes/User.route.js';
 //Routes For User,admin,review,bookmarks,skill
 
 
@@ -26,6 +27,9 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
     res.send("Server is running...");
 });
+
+//users api
+app.use("/api/j1/v1/user", User);
 
 // user routes
 
