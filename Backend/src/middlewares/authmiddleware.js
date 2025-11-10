@@ -1,4 +1,4 @@
-import {User} from "../models/User.Schema.js"
+import User from "../models/User.Schema.js"
 import {ApiError} from "../utils/ApiError.js"
 import {asyncHandler} from "../utils/AsyncHandler.js"
 import jwt from "jsonwebtoken"

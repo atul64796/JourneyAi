@@ -8,7 +8,7 @@ cloudinary.config({
 })
 
 // upload avatar and coverimage to cloudinary
-const uploadOnCloudinary = async (localFilePath) =>{
+export const uploadOnCloudinary = async (localFilePath) =>{
     try {
      if(!localFilePath) return null;
      const response = await cloudinary.uploader.upload(localFilePath,{
@@ -26,4 +26,3 @@ const uploadOnCloudinary = async (localFilePath) =>{
         return null;
         }
 } 
-  export {uploadOnCloudinary}; 

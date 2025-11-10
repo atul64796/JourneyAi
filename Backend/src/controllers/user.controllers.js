@@ -1,11 +1,11 @@
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/AsyncHandler.js"
-import {uploadOncloudnary} from "../utils/cloudinary.js"
-import {User} from "../models/User.Schema.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import mongoose from "mongoose";
+import {uploadOnCloudinary} from "../utils/cloudinary.js"
+import User from "../models/User.Schema.js";
+// import bcrypt from "bcryptjs";
+// import jwt from "jsonwebtoken";
+// import mongoose from "mongoose";
 
 
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -70,8 +70,8 @@ const registerUser = asyncHandler(async (req,res) => {
     }
 
     //upload both avatar and coverImage to cloudnary
-    const avatar = await uploadOncloudnary(avatarLocalPath);
-    const coverImage = await uploadOncloudnary(coverImageLocalPath);
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
     if(!avatar)
     {
