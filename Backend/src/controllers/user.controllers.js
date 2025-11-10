@@ -4,7 +4,7 @@ import {asyncHandler} from "../utils/AsyncHandler.js"
 import {uploadOnCloudinary} from "../utils/cloudinary.js"
 import User from "../models/User.Schema.js";
 // import bcrypt from "bcryptjs";
-// import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 // import mongoose from "mongoose";
 
 
@@ -14,7 +14,7 @@ const generateAccessAndRefreshTokens = async (userId) => {
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
         user.refreshToken = refreshToken;
-        user.save({validateBeforeSave:false})
+        await user.save({validateBeforeSave:false})
 
         return {accessToken,refreshToken};
     } catch (error) {
@@ -24,79 +24,47 @@ const generateAccessAndRefreshTokens = async (userId) => {
 
 
 const registerUser = asyncHandler(async (req,res) => {
-    //get user details from frontend
-    //validation -not empty
-    //check  if user exist already error and res
-    //check avatar  coverImage
-    //upload avatar and coverImage
-    //create user object mongodb upload
-    //remove token field and password field 
-    //check user create
-    //return response
+    const {username, fullName, email, password} = req.body;
+    console.log("Request body:", req.body);
+    console.log("Files:", req.files);
 
-    //get data from frontend
-    const {username,fullName,email,password} = req.body;
-
-      //validation -not empty
-    if([fullName,email,username,password].some((field)=>field?.trim()==="")){
-        throw new ApiError(400,"All field are required");
+    // Validation
+    if([fullName, email, username, password].some(f => !f?.trim())) {
+        throw new ApiError(400, "All fields are required");
     }
 
-    //check  if user exist already error and res
-    const existedUser = User.findOne({
-        $or:[{username},{email}],
-    });
+    // Check if user already exists
+    const existedUser = await User.findOne({ $or: [{username}, {email}] });
+    if(existedUser) throw new ApiError(400, "User with email or username already exists");
 
-     //check  if user exist already error and res
-    if(existedUser)
-    {
-        throw new ApiError(400,"user with email or username already exists");
-    }
-    //check for image and check for avatar
-    const avatarLocalPath = req.file?.avatar[0]?.path;
+    // Avatar must be present
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
+    if(!avatarLocalPath) throw new ApiError(400, "Avatar file is required");
 
-    let coverImageLocalPath;
+    // Cover image is optional
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
-    if(
-        req.file && Array.isArray(req.files.coverImage) 
-        && req.files.coverImage.length > 0
-    ) {
-        coverImageLocalPath = req.files.coverImage[0].path;
-    }
-    
-    if(!avatarLocalPath)
-    {
-        throw new Api(400,"Avatar file is required");
-    }
+    // Upload to Cloudinary
+    const avatarUpload = await uploadOnCloudinary(avatarLocalPath);
+    if(!avatarUpload?.secure_url) throw new ApiError(400, "Avatar upload failed");
 
-    //upload both avatar and coverImage to cloudnary
-    const avatar = await uploadOnCloudinary(avatarLocalPath);
-    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    const coverUpload = coverImageLocalPath ? await uploadOnCloudinary(coverImageLocalPath) : null;
 
-    if(!avatar)
-    {
-        throw new ApiError(400,"Avatar file is required");
-    }
-
-    //created user object - create entry in mongodb
-    const createduser = await User.create({
+    // Create user
+    const createdUser = await User.create({
         fullName,
-        avatar: avatar.url,
-        coverImage:coverImage?.url || "",
+        username: username.toLowerCase(),
         email,
         password,
-        username: username.toLowerCase(),
+        avatar: avatarUpload.secure_url,
+        coverImage: coverUpload?.secure_url || ""
     });
 
-    //check for user creation
-    if(createduser)
-    {
-        throw new ApiError(400,"something went wrong while registring the user");
-    }
-     return res
-    .status(201)
-    .json(new ApiResponse(200, createdUser, "User register sucessfully"));
-})
+    if(!createdUser) throw new ApiError(500, "Something went wrong while registering the user");
+
+    return res.status(201).json(new ApiResponse(201, createdUser, "User registered successfully"));
+});
+
 
 
 
@@ -132,7 +100,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid user credentials");
   }
   //acess and refress token
-  const { acessToken, refreshToken } = await generateAccessAndRefreshTokens(
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
     user._id
   );
 
@@ -147,14 +115,14 @@ const loginUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .cookie("accessToken", acessToken, options)
-    .cookie("refreshToken", acessToken, options)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
     .json(
       new ApiResponse(
         200, //success
         {
           user: loggedinUser,
-          acessToken,
+          accessToken,
           refreshToken,
         },
         "User logged In Sucessfully"
@@ -188,7 +156,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "user logged out Sucessfully"));
 });
 
-// change password
+
 
 
 
