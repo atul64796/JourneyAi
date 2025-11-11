@@ -36,15 +36,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    role:{
-        type:String,
-        enum:['user','admin','editor','premium'],
-        default:'user',
-        index:true
-    },
-    metaData:{
-        type:mongoose.Schema.Types.Mixed
-    },
     refreshToken:{
         type:String
     },
