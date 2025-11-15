@@ -36,6 +36,33 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    role: {         //role for admin
+    type: String,
+    enum: ["user", "admin"],
+    default: "user",
+  },
+
+  isBanned: {           //check account ban or unban
+    type: Boolean,
+    default: false,
+  },
+
+  accountStatus: {     //cuurnt status of account ban or unban
+    type: String,
+    enum: ["active", "deactivated"],
+    default: "active",
+  },
+
+  lastLogin: {      //track last login
+    type: Date,
+  },
+
+  bio: {          // bio for user profile just like instagram 
+    type: String,
+    trim: true,
+    default: "",
+  },
+
     refreshToken:{
         type:String
     },

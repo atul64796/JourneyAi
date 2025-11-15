@@ -184,6 +184,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "User logged out successfully"));
 });
 
+
 //update password
 const updatePassword = asyncHandler(async (req,res) => {
   const { oldPasword, newPassword} = req.body;
