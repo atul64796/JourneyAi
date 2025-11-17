@@ -4,7 +4,9 @@ import {
   logoutUser,
   updatePassword,
   getCurrentUser,
-  updateAccountDetails
+  updateAccountDetails,
+  avatarUpdate,
+  UpdateCoverImage
   } from "../controllers/user.controllers.js"
 import {Router} from "express";
 import {verifyJwt} from "../middlewares/authmiddleware.js"
@@ -47,6 +49,10 @@ router.route("/get-currentUser").get(verifyJwt,getCurrentUser);
 //update account details
 router.route("/updateAccount-Details").post(verifyJwt,updateAccountDetails);
 
+//update Avatar 
+router.route("/updateAvatar").patch(verifyJwt,upload.single("avatar"),avatarUpdate)
+//update coverImage
+router.route("/updateCoverImage").patch(verifyJwt,upload.single("coverImage"),UpdateCoverImage);
 export default router;
 
 
