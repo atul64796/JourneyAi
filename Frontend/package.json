@@ -11,9 +11,12 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
+    "axios": "^1.13.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "react-hook-form": "^7.68.0",
     "react-router-dom": "^7.10.1",
+    "sweetalert2": "^11.26.4",
     "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
