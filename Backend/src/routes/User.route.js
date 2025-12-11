@@ -1,7 +1,18 @@
-import { registerUser, loginUser, logoutUser} from "../controllers/user.controllers.js"
+import { 
+  registerUser,
+  loginUser,
+  logoutUser,
+  updatePassword,
+  getCurrentUser,
+  updateAccountDetails,
+  avatarUpdate,
+  UpdateCoverImage
+  } from "../controllers/user.controllers.js"
 import {Router} from "express";
 import {verifyJwt} from "../middlewares/authmiddleware.js"
 import { upload } from "../middlewares/multer.middlewares.js";
+import { asyncHandler } from "../utils/AsyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
 
 const router = Router();
 
@@ -29,10 +40,19 @@ router.route("/loginUser").post(loginUser);
 // logout user
 router.route("/logoutUser").post(verifyJwt, logoutUser);
 
+//updatePassword
+router.route("/update-password").patch(verifyJwt,updatePassword);
 
+//get cuurent user
+router.route("/get-currentUser").get(verifyJwt,getCurrentUser);
 
+//update account details
+router.route("/updateAccount-Details").post(verifyJwt,updateAccountDetails);
 
-
+//update Avatar 
+router.route("/updateAvatar").patch(verifyJwt,upload.single("avatar"),avatarUpdate)
+//update coverImage
+router.route("/updateCoverImage").patch(verifyJwt,upload.single("coverImage"),UpdateCoverImage);
 export default router;
 
 
