@@ -48,13 +48,14 @@ function Register() {
       text: "Something went wrong!",
       });
     }
+    setLoading(false)
   }
 
 
   return (
     <>
       <div className='flex flex-col justify-center items-center h-[100vh]'>
-      <div className='border p-7 '>
+      <div className=' shadow-md  p-7 bg-[#F4F4F4] '>
        <div className='flex justify-center'><h1>Register</h1></div>
        <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data" className='flex flex-col gap-6' >
         <div>
