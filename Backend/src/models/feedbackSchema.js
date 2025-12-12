@@ -11,7 +11,7 @@ const feedbackSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Story',
     required: true 
-  },
+  }, //hello
 
   rating: {
     type: Number,
