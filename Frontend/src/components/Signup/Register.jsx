@@ -52,18 +52,19 @@ function Register() {
   }
 
 
+
   return (
     <>
       <div className='flex flex-col justify-center items-center h-[100vh]'>
       <div className=' shadow-md  p-7 bg-[#F4F4F4] '>
        <div className='flex justify-center'><h1>Register</h1></div>
-       <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data" className='flex flex-col gap-6' >
+       <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data" className='flex flex-col gap-8' >
         <div>
           <input
             type="text"
             placeholder="Username"
             {...register("username", { required: "Username is required" })}
-            className='border w-full p-2'
+            className='border w-full p-2 border-radius rounded-sm'
           />
           {errors.username && (
             <p className="text-red-600 text-sm">{errors.username.message}</p>
@@ -75,7 +76,7 @@ function Register() {
             type="text"
             placeholder="Full name"
             {...register("fullName", { required: "Full name is required" })}
-             className='border w-full p-2'
+             className='border w-full p-2 rounded-sm'
           />
           {errors.fullName && (
             <p className="text-red-600 text-sm">{errors.fullName.message}</p>
@@ -87,7 +88,7 @@ function Register() {
             type="email"
             placeholder="Email"
             {...register("email", { required: "Email is required" })}
-             className='border w-full p-2'
+             className='border  p-2 rounded-sm w-1/3'
           />
           {errors.email && (
             <p className="text-red-600 text-sm">{errors.email.message}</p>
@@ -102,7 +103,7 @@ function Register() {
               required: "Password is required",
               minLength: { value: 6, message: "Min 6 characters" },
             })}
-             className='border w-full p-2'
+             className='border w-full p-2 rounded-sm'
           />
           {errors.password && (
             <p className="text-red-600 text-sm">{errors.password.message}</p>
@@ -110,12 +111,12 @@ function Register() {
         </div>
 
         <div className='flex'>
-        <div className='flex flex-col'>
+        <div className='flex flex-col w-1/3'>
           <label>Avatar</label>
           <input type="file" {...register("avatar")} accept="image/*" />
         </div>
 
-        <div className='flex flex-col'>
+        <div className='flex flex-col w-1/3'>
           <label>Cover Image</label>
           <input type="file" {...register("coverImage")} accept="image/*" />
         </div>
