@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-
+import { FaPlaneDeparture } from "react-icons/fa";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
 
   const links = [
     { to: "/features", label: "Features" },
@@ -16,21 +17,20 @@ export default function Navbar() {
     }`;
 
   return (
-    <nav className="w-full bg-gradient-to-r from-[#0d0f2d] via-[#1a1440] to-[#2b0f52] text-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="flex items-center justify-between h-16">
-          {/* Left: Logo */}
-          <div className="flex items-center">
-            <NavLink to="/" className="flex items-center gap-3">
-              <span className="font-bold text-2xl md:text-3xl text-[#FFC50F] tracking-wide  w-60">
-                Journey Ai
-              </span>
-            </NavLink>
-          </div>
+    <nav className="w-full bg-gradient-to-r from-[#0d0f2d] via-[#1a1440] to-[#2b0f52] text-white shadow-sm ">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="flex  justify-between  w-full h-15">
+          {/* Logo */}
+          <NavLink to="/" className="flex items-center gap-2 transform scale-100 hover:scale-110 transition  ">
+            <FaPlaneDeparture className="text-2xl text-purple-600" />
+            <span className="font-bold text-2xl md:text-2xl  tracking-wide text-yellow-500  ">
+              Journey Ai
+            </span>
+          </NavLink>
 
-          {/* Center/Right: Desktop links + CTA */}
-          <div className="hidden md:flex md:items-center md:gap-8 w-full">
-            <div className="flex-1 flex justify-center gap-10 text-lg">
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-8     w-[80%]">
+            <div className="flex-1 flex justify-center gap-10 text-lg ">
               {links.map((l) => (
                 <NavLink key={l.to} to={l.to} className={navLinkClass}>
                   {l.label}
@@ -38,12 +38,15 @@ export default function Navbar() {
               ))}
             </div>
 
-            <div className="flex items-center gap-6  ">
+            {/* Right Side */}
+            <div className="flex items-center gap-6 relative">
               <NavLink
                 to="/login"
                 className={({ isActive }) =>
-                  `text-sm transition ${
-                    isActive ? "text-yellow-400" : "text-white hover:text-yellow-400"
+                  `text-sm ${
+                    isActive
+                      ? "text-yellow-400"
+                      : "text-white hover:text-yellow-400"
                   }`
                 }
               >
@@ -51,72 +54,136 @@ export default function Navbar() {
               </NavLink>
 
               <NavLink to="/get-started">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full
-                             bg-gradient-to-r from-[#ae08dc] via-[#6a0bcf] to-[#250fa0]
-                             text-white text-sm font-medium shadow-md hover:scale-[1.01] transition-transform"
-                >
+                <button className="px-4 py-2 rounded-full bg-gradient-to-r from-[#ae08dc] via-[#6a0bcf] to-[#250fa0] text-sm shadow-md">
                   Get Started
                 </button>
               </NavLink>
+
+              {/* Desktop Account */}
+              <button onClick={() => setAccountOpen(!accountOpen)}>
+                <img
+                  src="https://i.pravatar.cc/40"
+                  alt="profile"
+                  className="w-9 h-9 rounded-full border border-white/20"
+                />
+              </button>
+
+              {accountOpen && (
+                <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-lg z-50">
+                  <div className="px-4 py-3 border-b">
+                    <p className="text-sm font-semibold text-gray-800">
+                      Atul Chourasia
+                    </p>
+                  </div>
+
+                  <NavLink
+                    to="/profile"
+                    className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setAccountOpen(false)}
+                  >
+                    View profile
+                  </NavLink>
+
+                  <NavLink
+                    to="/account"
+                    className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setAccountOpen(false)}
+                  >
+                    My account
+                  </NavLink>
+
+                  <button
+                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50"
+                    onClick={() => setAccountOpen(false)}
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
+          {/* Mobile Buttons */}
+          <div className="md:hidden flex items-center gap-3">
+            <button onClick={() => setAccountOpen(!accountOpen)}>
+              <img
+                src="https://i.pravatar.cc/40"
+                alt="profile"
+                className="w-8 h-8 rounded-full border border-white/20"
+              />
+            </button>
+
             <button
-              onClick={() => setOpen((s) => !s)}
-              aria-controls="mobile-menu"
-              aria-expanded={open}
-              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400"
+              onClick={() => setOpen(!open)}
+              className="p-2 text-white"
             >
-              {/* simple hamburger / close icon */}
-              <span className="sr-only">Open main menu</span>
-              {!open ? (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              ) : (
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
+              {open ? "✕" : "☰"}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile Account Dropdown */}
+      {accountOpen && (
+        <div className="md:hidden bg-[#1a1440] border-t border-white/10 px-4 py-4">
+          <p className="text-sm text-white/90 mb-3">Atul Chourasia</p>
+
+          <NavLink
+            to="/profile"
+            className="block py-2 text-sm text-white hover:text-yellow-400"
+            onClick={() => setAccountOpen(false)}
+          >
+            View profile
+          </NavLink>
+
+          <NavLink
+            to="/account"
+            className="block py-2 text-sm text-white hover:text-yellow-400"
+            onClick={() => setAccountOpen(false)}
+          >
+            My account
+          </NavLink>
+
+          <button
+            className="block py-2 text-sm text-red-400"
+            onClick={() => setAccountOpen(false)}
+          >
+            Logout
+          </button>
+        </div>
+      )}
+
+      {/* Mobile Menu */}
       <div
-        id="mobile-menu"
-        className={`md:hidden transition-max-height duration-300 overflow-hidden ${
+        className={`md:hidden overflow-hidden transition-all ${
           open ? "max-h-screen" : "max-h-0"
         }`}
       >
-        <div className="px-4 pt-4 pb-6 space-y-2 sm:px-6">
+        <div className="px-4 py-6 space-y-3">
           {links.map((l) => (
-            <NavLink key={l.to} to={l.to} className={navLinkClass} onClick={() => setOpen(false)}>
+            <NavLink
+              key={l.to}
+              to={l.to}
+              className={navLinkClass}
+              onClick={() => setOpen(false)}
+            >
               {l.label}
             </NavLink>
           ))}
 
-          <div className="pt-2 border-t border-white/6 mt-2">
-            <NavLink
-              to="/login"
-              className="block px-3 py-2 rounded-md text-white hover:text-yellow-400"
-              onClick={() => setOpen(false)}
-            >
-              Sign in
-            </NavLink>
+          <NavLink
+            to="/login"
+            className="block px-3 py-2 text-white hover:text-yellow-400"
+            onClick={() => setOpen(false)}
+          >
+            Sign in
+          </NavLink>
 
-            <NavLink to="/get-started" onClick={() => setOpen(false)}>
-              <button className="mt-3 w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full
-                                 bg-gradient-to-r from-[#ae08dc] via-[#6a0bcf] to-[#250fa0] text-white font-medium">
-                Get Started
-              </button>
-            </NavLink>
-          </div>
+          <NavLink to="/get-started" onClick={() => setOpen(false)}>
+            <button className="w-full mt-2 px-4 py-2 rounded-full bg-gradient-to-r from-[#ae08dc] via-[#6a0bcf] to-[#250fa0]">
+              Get Started
+            </button>
+          </NavLink>
         </div>
       </div>
     </nav>
