@@ -27,8 +27,9 @@ function Home() {
           {/* Gradient stroked headline */}
           <h2
             className="font-extrabold leading-tight text-4xl sm:text-5xl md:text-6xl lg:text-[9vmin]
-                       bg-gradient-to-r from-[#ae08dc] via-[#6a0bcf] to-[#250fa0]
-                       bg-clip-text text-transparent"
+             bg-gradient-to-r from-[#ae08dc] via-[#6a0bcf] to-[#250fa0]
+             bg-clip-text text-transparent
+             drop-shadow-[0_5px_1px_rgba(0,0,0,0.35)]"
             
           >
             Into Living Stories
