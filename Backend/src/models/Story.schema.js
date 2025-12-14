@@ -17,28 +17,35 @@ const storySchema = new mongoose.Schema(
     duration: {
       type: String,
       required: true,
+      trim: true,
     },
 
     mood: {
       type: String,
       required: true,
+      trim: true,
     },
 
     language: {
       type: String,
       enum: ["english", "hindi", "bengali"],
       default: "english",
+      lowercase: true, // 🔥 auto-fix input
+      trim: true,
     },
 
     templateStyle: {
       type: String,
       enum: ["cinematic", "funny", "emotional", "thriller"],
       default: "cinematic",
+      lowercase: true, // 🔥 auto-fix input
+      trim: true,
     },
 
     storyText: {
       type: String,
       required: true,
+      trim: true,
     },
 
     imageUrl: {
@@ -59,9 +66,10 @@ const storySchema = new mongoose.Schema(
     regenerateCount: {
       type: Number,
       default: 0,
+      min: 0,
+      max: 5,
     },
 
-    // For shareable links
     isPublic: {
       type: Boolean,
       default: false,
@@ -71,9 +79,10 @@ const storySchema = new mongoose.Schema(
       type: String,
       unique: true,
       sparse: true,
-    }
+    },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Story", storySchema);
+const Story = mongoose.model("Story", storySchema);
+export default Story;
