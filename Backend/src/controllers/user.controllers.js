@@ -288,13 +288,71 @@ const UpdateCoverImage = asyncHandler(async (req,res) => {
 })
 
 
+const getAllUsers = asyncHandler(async (req, res) => {
+  const users = await User.find().select("-password -refreshToken");
 
-export { 
-    registerUser,
-    loginUser,
-    logoutUser,
-    updatePassword,getCurrentUser,
-    updateAccountDetails,
-    avatarUpdate,
-    UpdateCoverImage
-  };
+  return res.status(200).json(
+    new ApiResponse(200, users, "All users fetched successfully")
+  );
+});
+
+
+const toggleUserBan = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  user.isBanned = !user.isBanned;
+  await user.save();
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      user,
+      `User ${user.isBanned ? "banned" : "unbanned"} successfully`
+    )
+  );
+});
+
+const toggleAccountStatus = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  user.accountStatus =
+    user.accountStatus === "active" ? "deactivated" : "active";
+
+  await user.save();
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      user,
+      `Account ${user.accountStatus} successfully`
+    )
+  );
+});
+
+
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  updatePassword,
+  getCurrentUser,
+  updateAccountDetails,
+  avatarUpdate,
+  UpdateCoverImage,
+
+  // 🔥 admin functions
+  getAllUsers,
+  toggleUserBan,
+  toggleAccountStatus,
+};

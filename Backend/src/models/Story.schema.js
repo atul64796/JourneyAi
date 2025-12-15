@@ -47,6 +47,10 @@ const storySchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    images: {
+    type: [String],
+    default: [],
+    },
 
     imageUrl: {
       type: String,

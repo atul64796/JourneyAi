@@ -3,7 +3,7 @@ import {
   createStoryServices,
   regenerateStoryService,
   toggleStoryVisibilityService,
-} from "../Service/GemniService.js";
+} from "../Service/Gemni.service.js";
 
 const router = express.Router();
 
