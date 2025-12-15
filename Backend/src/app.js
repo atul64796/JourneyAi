@@ -3,8 +3,9 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import User from './routes/User.route.js';
 import dotenv from "dotenv";
-import storyRoutes from "./routes/Gemni.route.js"
+import storyRoutes from "./routes/Story.route.js"
 import adminRoutes from "./routes/admin.route.js";
+import feedbackroute from "./routes/feedback.route.js"
 import path from "path";
 
 
@@ -38,6 +39,8 @@ app.use("/j1/v1/user", User);
 
 //gemni route
 app.use("/j1/v1/stories",storyRoutes)
+
+app.use("/j1/v1/feedback",feedbackroute)
 
 //admin
 app.use("/j1/v1/admin",adminRoutes)

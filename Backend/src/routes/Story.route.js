@@ -5,13 +5,17 @@ import {
   toggleStoryVisibilityService,
 } from "../Service/Gemni.service.js";
 
+import { verifyJwt } from "../middlewares/authmiddleware.js";
+
 const router = express.Router();
 
-
-router.post("/", async (req, res) => {
+// ============================
+// CREATE STORY (AUTH REQUIRED)
+// ============================
+router.post("/", verifyJwt, async (req, res) => {
   try {
     const story = await createStoryServices({
-      userId: req.body.userId,   // ✅ FIX
+      userId: req.user._id, // ✅ FIXED (from JWT)
       destination: req.body.destination,
       duration: req.body.duration,
       mood: req.body.mood,
@@ -20,15 +24,23 @@ router.post("/", async (req, res) => {
       isPublic: req.body.isPublic,
     });
 
-    res.status(201).json({ success: true, data: story });
+    res.status(201).json({
+      success: true,
+      message: "Story created successfully",
+      data: story,
+    });
   } catch (err) {
-    res.status(400).json({ success: false, message: err.message });
+    res.status(400).json({
+      success: false,
+      message: err.message,
+    });
   }
 });
 
-
-
-router.post("/:storyId/regenerate", async (req, res) => {
+// ============================
+// REGENERATE STORY
+// ============================
+router.post("/:storyId/regenerate", verifyJwt, async (req, res) => {
   try {
     const story = await regenerateStoryService(req.params.storyId);
 
@@ -45,15 +57,17 @@ router.post("/:storyId/regenerate", async (req, res) => {
   }
 });
 
-
-router.patch("/:storyId/visibility", async (req, res) => {
+// ============================
+// TOGGLE STORY VISIBILITY
+// ============================
+router.patch("/:storyId/visibility", verifyJwt, async (req, res) => {
   try {
     const { isPublic } = req.body;
 
     if (typeof isPublic !== "boolean") {
       return res.status(400).json({
         success: false,
-        message: "isPublic must be a boolean",
+        message: "isPublic must be boolean",
       });
     }
 

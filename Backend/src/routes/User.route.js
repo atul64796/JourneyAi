@@ -7,7 +7,7 @@ import {
   updateAccountDetails,
   avatarUpdate,
   UpdateCoverImage
-  } from "../controllers/user.controllers.js"
+  } from "../controllers/user.controller.js"
 import {Router} from "express";
 import {verifyJwt} from "../middlewares/authmiddleware.js"
 import { upload } from "../middlewares/multer.middlewares.js";

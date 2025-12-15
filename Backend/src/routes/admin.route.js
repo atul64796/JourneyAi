@@ -6,7 +6,12 @@ import {
   getAllUsers,
   toggleUserBan,
   toggleAccountStatus,
-} from "../controllers/user.controllers.js";
+} from "../controllers/user.controller.js";
+
+import { getAllFeedback,
+  respondToFeedback,
+  adminDeleteFeedback
+ } from "../controllers/feedback.controller.js";
 
 const router = express.Router();
 
@@ -22,5 +27,10 @@ router.get("/me", (req, res) => {
 router.get("/users", getAllUsers);
 router.patch("/users/:userId/ban", toggleUserBan);
 router.patch("/users/:userId/status", toggleAccountStatus);
+
+//feedbacks routes for admin
+router.get("/feedback",getAllFeedback);
+router.patch("/feedback/:feedbackId/respond",respondToFeedback);
+router.delete("/feedback/:feedbackId", adminDeleteFeedback);
 
 export default router;
