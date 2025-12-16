@@ -186,24 +186,28 @@ const logoutUser = asyncHandler(async (req, res) => {
 
 
 //update password
-const updatePassword = asyncHandler(async (req,res) => {
-  const { oldPasword, newPassword} = req.body;
+const updatePassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
 
   const user = await User.findById(req.user?._id);
-  const isPasswordCorrect = await user.isPasswordCorrect(oldPasword);
-  console.log(user);
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
 
-  if(!isPasswordCorrect)
-  {
-    throw new ApiError(400,"Invalid old password");
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordCorrect) {
+    throw new ApiError(400, "Invalid old password");
   }
 
   user.password = newPassword;
-  await user.save({validateBeforeSave:false})
-  return res
-  .status(200)
-  .json(new ApiResponse(200,{},"Password changed Successfully"))
+  await user.save({ validateBeforeSave: false });
+
+  return res.status(200).json(
+    new ApiResponse(200, {}, "Password changed successfully")
+  );
 });
+
 
 //get current user
 

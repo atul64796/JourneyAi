@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import api from "../../services/api";
 import { Pencil } from "lucide-react";
-
+import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AvatarContext } from "../../context/AvatarProvider";
 function Profile() {
   const [user, setUser] = useState(null);
   const [loadingAvatar, setLoadingAvatar] = useState(false);
@@ -9,6 +11,11 @@ function Profile() {
 
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
+
+    const { updateAvatar  } = useContext(AvatarContext);
+  
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getProfile = async () => {
@@ -18,6 +25,8 @@ function Profile() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(res.data.data);
+        console.log(res.data.data.avatar)
+        updateAvatar(res.data.data.avatar);
       } catch (error) {
         console.error(error.response?.data || error.message);
       }
@@ -42,6 +51,7 @@ function Profile() {
         },
       });
       setUser(res.data.data);
+      updateAvatar(res.data.data.avatar); 
     } catch (err) {
       console.error(err.response?.data || err.message);
     } finally {
@@ -155,11 +165,15 @@ function Profile() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
-            <button className="w-full sm:flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-medium">
+            <button className="w-full sm:flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-xl font-medium" onClick={(()=>{
+              navigate("/updateAccount")
+            })}>
               Update Account
             </button>
 
-            <button className="w-full sm:flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl font-medium">
+            <button className="w-full sm:flex-1 border border-gray-300 text-gray-700 py-3 rounded-xl font-medium" onClick={(()=>{
+              navigate("/changePassword")
+            })}>
               Change Password
             </button>
           </div>

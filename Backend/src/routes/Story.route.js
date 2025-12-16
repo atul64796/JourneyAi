@@ -9,9 +9,9 @@ import { verifyJwt } from "../middlewares/authmiddleware.js";
 
 const router = express.Router();
 
-// ============================
+
 // CREATE STORY (AUTH REQUIRED)
-// ============================
+
 router.post("/", verifyJwt, async (req, res) => {
   try {
     const story = await createStoryServices({
@@ -37,9 +37,9 @@ router.post("/", verifyJwt, async (req, res) => {
   }
 });
 
-// ============================
+
 // REGENERATE STORY
-// ============================
+
 router.post("/:storyId/regenerate", verifyJwt, async (req, res) => {
   try {
     const story = await regenerateStoryService(req.params.storyId);
@@ -57,9 +57,9 @@ router.post("/:storyId/regenerate", verifyJwt, async (req, res) => {
   }
 });
 
-// ============================
+
 // TOGGLE STORY VISIBILITY
-// ============================
+
 router.patch("/:storyId/visibility", verifyJwt, async (req, res) => {
   try {
     const { isPublic } = req.body;

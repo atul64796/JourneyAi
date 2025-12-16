@@ -5,48 +5,45 @@ import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 
-
-export default function Login() {
+function ChangePassword() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
+
+  const newPassword = watch("newPassword");
 
   const onSubmit = async (data) => {
     setLoading(true);
 
     try {
-      const res = await api.post("/user/loginUser", {
-        email: data.email,
-        password: data.password,
+      await api.patch("/user/update-password", {
+        oldPassword: data.oldPassword,
+        newPassword: data.newPassword,
       });
 
-      const { user, accessToken, refreshToken } = res.data.data;
+      Swal.fire(
+        "Password Updated",
+        "Please login again with your new password",
+        "success"
+      ).then(() => {
+        
+        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        navigate("/login");
+      });
 
-      // store tokens
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("user", JSON.stringify(user));
-
-      Swal.fire("Success", "Login successful", "success");
-
-      // role-based redirect
-      if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/dashboard");
-      }
     } catch (err) {
       const message =
         err.response?.data?.message ||
-        err.response?.data?.data?.message ||
-        "Invalid email or password";
+        "Current password is incorrect";
 
       Swal.fire("Error", message, "error");
     } finally {
@@ -57,45 +54,38 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gray-100">
       <div className="w-full max-w-md bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-3xl font-semibold mb-2 text-center">Sign In</h1>
-
-        <p className="text-sm mb-6 text-center">
-          Don’t have an account?{" "}
-          <button
-            onClick={() => navigate("/register")}
-            className="text-purple-600 underline"
-          >
-            Sign Up
-          </button>
-        </p>
+        <h1 className="text-3xl font-semibold mb-4 text-center">
+          Change Password
+        </h1>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Email */}
+
+          {/* Current Password */}
           <div>
-            <label className="text-sm font-medium">Email</label>
+            <label className="text-sm font-medium">Current Password</label>
             <input
-              type="email"
-              {...register("email", {
-                required: "Email is required",
+              type={showPassword ? "text" : "password"}
+              {...register("oldPassword", {
+                required: "Current password is required",
               })}
               className="w-full border p-2 rounded-md"
-              placeholder="example@gmail.com"
+              placeholder="********"
             />
-            {errors.email && (
+            {errors.oldPassword && (
               <p className="text-red-600 text-sm mt-1">
-                {errors.email.message}
+                {errors.oldPassword.message}
               </p>
             )}
           </div>
 
-          {/* Password */}
+          {/* New Password */}
           <div>
-            <label className="text-sm font-medium">Password</label>
+            <label className="text-sm font-medium">New Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
-                {...register("password", {
-                  required: "Password is required",
+                {...register("newPassword", {
+                  required: "New password is required",
                   minLength: {
                     value: 6,
                     message: "Minimum 6 characters",
@@ -112,9 +102,28 @@ export default function Login() {
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
-            {errors.password && (
+            {errors.newPassword && (
               <p className="text-red-600 text-sm mt-1">
-                {errors.password.message}
+                {errors.newPassword.message}
+              </p>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label className="text-sm font-medium">Confirm New Password</label>
+            <input
+              type={showPassword ? "text" : "password"}
+              {...register("confirmPassword", {
+                validate: (value) =>
+                  value === newPassword || "Passwords do not match",
+              })}
+              className="w-full border p-2 rounded-md"
+              placeholder="********"
+            />
+            {errors.confirmPassword && (
+              <p className="text-red-600 text-sm mt-1">
+                {errors.confirmPassword.message}
               </p>
             )}
           </div>
@@ -129,14 +138,12 @@ export default function Login() {
                 : "bg-gradient-to-r from-purple-600 to-indigo-700 hover:opacity-90"
             }`}
           >
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? "Updating Password..." : "Confirm"}
           </button>
-
-          <p className="text-xs text-gray-400 text-center mt-3">
-            By signing in, you accept our terms of service and privacy policy
-          </p>
         </form>
       </div>
     </div>
   );
 }
+
+export default ChangePassword;

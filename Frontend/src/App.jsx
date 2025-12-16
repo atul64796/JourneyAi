@@ -8,9 +8,12 @@ import Navbar from "./components/Navbar";
 import Profile from "./components/Profile/Profile";
 import AdminPanel from "./components/Admin/AdminPanel";
 import Dashboard from "./components/Dashboard/Dashboard";
-
+import UpdateAccount from "./components/update-Account/UpdateAccount";
+import ChangePassword from "./components/update-Account/ChangePassword";
 import ProtectedRoute from "./components/ProtectRoute"
 import AdminRoute from "./components/ProtectRoute/AdminRoute"
+
+
 
 function App() {
   return (
@@ -22,6 +25,26 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        
+
+        <Route
+  path="/updateAccount"
+  element={
+    <ProtectedRoute>
+      <UpdateAccount />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/changePassword"
+  element={
+    <ProtectedRoute>
+      <ChangePassword />
+    </ProtectedRoute>
+  }
+/>
+
 
         {/* User protected routes */}
         <Route
@@ -50,6 +73,7 @@ function App() {
               <AdminPanel />
             </AdminRoute>
           }
+          
         />
       </Routes>
     </Router>

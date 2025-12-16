@@ -4,7 +4,7 @@ import { createStoryServices } from "../Service/Gemni.service.js";
 
 export const createStory = asyncHandler(async (req, res) => {
   const story = await createStoryServices({
-    userId: req.user._id,          // ✅ ALWAYS from JWT
+    userId: req.user._id,          
     destination: req.body.destination,
     duration: req.body.duration,
     mood: req.body.mood,

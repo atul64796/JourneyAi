@@ -28,7 +28,7 @@ const storySchema = new mongoose.Schema(
 
     language: {
       type: String,
-      enum: ["english", "hindi", "bengali"],
+      enum: ["english", "hindi", "bengali","marathi","spanish","french"],
       default: "english",
       lowercase: true, // 🔥 auto-fix input
       trim: true,

@@ -274,8 +274,9 @@ export default function Dashboard() {
                             className="border p-2 rounded w-full bg-white text-gray-700"
                         >
                             <option value="cinematic">Cinematic</option>
-                            <option value="blog">Blog</option>
-                            <option value="story">Story</option>
+                            <option value="funny">Funny</option>
+                            <option value="emotional">Emotional</option>
+                            <option value="thriller">Thriller</option>
                         </select>
                     </div>
                     <label className="flex items-center gap-2 text-gray-700 mt-6">
@@ -305,7 +306,7 @@ export default function Dashboard() {
 
      
       <div className="max-w-4xl mx-auto p-6">
-        {error && <p className="text-red-400 font-medium text-center">{error}</p>}
+        {error && <p className="text-red-400 font-medium text-center">Try After Some Time</p>}
       </div>
 
       

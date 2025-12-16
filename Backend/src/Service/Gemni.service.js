@@ -1,17 +1,18 @@
-import { GoogleGenAI } from "@google/genai";
+import OpenAI from "openai";
 import PromptBuilder from "../utils/Prompt.Builder.js";
 import Story from "../models/Story.schema.js";
 import { getUnsplashImagesService } from "./unsplash.service.js";
 
-const client = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
+const client = new OpenAI({
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
 });
 
-const TEXT_MODEL = "gemini-2.5-flash";
+const TEXT_MODEL = "moonshotai/kimi-k2-instruct";
 
-// ============================
+
 // CREATE STORY
-// ============================
+
 export const createStoryServices = async ({
   userId,
   destination,
@@ -21,9 +22,7 @@ export const createStoryServices = async ({
   templateStyle,
   isPublic = false,
 }) => {
-  if (!userId) {
-    throw new Error("UserId is required");
-  }
+  if (!userId) throw new Error("UserId is required");
 
   const prompt = PromptBuilder.buildStoryPrompt({
     destination,
@@ -33,13 +32,12 @@ export const createStoryServices = async ({
     templateStyle,
   });
 
-  const result = await client.models.generateContent({
+  const response = await client.responses.create({
     model: TEXT_MODEL,
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    input: prompt,
   });
 
-  const storyText =
-    result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+  const storyText = response.output_text?.trim();
 
   if (!storyText || storyText.length < 50) {
     throw new Error("AI failed to generate a valid story");
@@ -66,9 +64,9 @@ export const createStoryServices = async ({
   });
 };
 
-// ============================
+
 // REGENERATE STORY
-// ============================
+
 export const regenerateStoryService = async (storyId) => {
   const story = await Story.findById(storyId);
   if (!story) throw new Error("Story not found");
@@ -83,13 +81,12 @@ export const regenerateStoryService = async (storyId) => {
     templateStyle: story.templateStyle,
   });
 
-  const result = await client.models.generateContent({
+  const response = await client.responses.create({
     model: TEXT_MODEL,
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    input: prompt,
   });
 
-  const newStoryText =
-    result?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+  const newStoryText = response.output_text?.trim();
 
   if (!newStoryText || newStoryText.length < 50) {
     throw new Error("AI failed to regenerate story");
@@ -109,9 +106,9 @@ export const regenerateStoryService = async (storyId) => {
   return story;
 };
 
-// ============================
+
 // TOGGLE VISIBILITY
-// ============================
+
 export const toggleStoryVisibilityService = async (storyId, isPublic) => {
   const story = await Story.findByIdAndUpdate(
     storyId,
