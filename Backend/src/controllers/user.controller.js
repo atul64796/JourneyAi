@@ -102,10 +102,14 @@ const registerUser = asyncHandler(async (req, res) => {
 const loginUser = asyncHandler(async (req, res) => {
   const { username, password, email } = req.body;
   console.log("Login Body:", req.body);
-
+  const user = await User.findOne({ email }).select("+password");
   
   if (!username && !email) {
     throw new ApiError(400, "Username or email is required");
+  }
+
+  if (user.isBanned) {
+    throw new ApiError(403, "Your account has been banned. Please contact support.");
   }
 
   // check username anor email

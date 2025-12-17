@@ -43,12 +43,25 @@ export default function Login() {
         navigate("/dashboard");
       }
     } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        err.response?.data?.data?.message ||
-        "Invalid email or password";
+      
+      const status = err.response?.status;
+  const message =
+    err.response?.data?.message ||
+    "Invalid email or password";
 
-      Swal.fire("Error", message, "error");
+  // 🚫 BANNED USER HANDLING
+  if (status === 403) {
+    Swal.fire({
+      icon: "error",
+      title: "Account Banned",
+      text: message,
+      confirmButtonColor: "#7c3aed",
+    });
+    return;
+  }
+
+  // ❌ Other errors
+  Swal.fire("Error", message, "error");
     } finally {
       setLoading(false);
     }

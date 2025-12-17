@@ -15,7 +15,7 @@ const router = express.Router();
 router.post("/", verifyJwt, async (req, res) => {
   try {
     const story = await createStoryServices({
-      userId: req.user._id, // ✅ FIXED (from JWT)
+      userId: req.user._id,
       destination: req.body.destination,
       duration: req.body.duration,
       mood: req.body.mood,

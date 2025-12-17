@@ -28,9 +28,9 @@ export default function Navbar() {
   const isAdmin = user?.role === "admin";
 
   const links = [
+    { to: "/", label: "Home" },
+    { to: "/about", label: "About" },
     { to: "/features", label: "Features" },
-    { to: "/demo", label: "How it Works" },
-    { to: "/showcase", label: "Showcase" },
     ...(isAdmin ? [{ to: "/admin/dashboard", label: "Admin Panel" }] : []),
     ...(isLoggedIn ? [{ to: "/user/dashboard", label: "Dashboard" }] : []),
   ];
