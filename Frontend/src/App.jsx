@@ -12,6 +12,7 @@ import UpdateAccount from "./components/update-Account/UpdateAccount";
 import ChangePassword from "./components/update-Account/ChangePassword";
 import ProtectedRoute from "./components/ProtectRoute";
 import AdminRoute from "./components/ProtectRoute/AdminRoute";
+import Stories from "./components/Stories";
 
 /* -----------------------------
    Layout Wrapper
@@ -64,6 +65,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <UpdateAccount />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/getpublicStories"
+            element={
+              <ProtectedRoute>
+                <Stories />
               </ProtectedRoute>
             }
           />

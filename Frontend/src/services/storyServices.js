@@ -23,4 +23,13 @@ export const createStory = async (storyData) => {
 };
 
 
+// GET PUBLIC STORIES (NO AUTH REQUIRED)
+export const getPublicStories = async (page = 1, limit = 10) => {
+  const response = await api.get(
+    `/stories/public?page=${page}&limit=${limit}`
+  );
+  return response.data;
+};
+
+
  

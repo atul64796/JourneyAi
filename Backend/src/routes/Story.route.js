@@ -5,10 +5,14 @@ import {
   toggleStoryVisibilityService,
 } from "../Service/Gemni.service.js";
 
+import { getPublicStories } from "../controllers/story.controller.js";
+
 import { verifyJwt } from "../middlewares/authmiddleware.js";
 
 const router = express.Router();
 
+// Get Public stories
+router.get("/public", getPublicStories);
 
 // CREATE STORY (AUTH REQUIRED)
 
@@ -88,5 +92,8 @@ router.patch("/:storyId/visibility", verifyJwt, async (req, res) => {
     });
   }
 });
+
+
+
 
 export default router;

@@ -29,7 +29,7 @@ export default function Navbar() {
 
   const links = [
     { to: "/", label: "Home" },
-    { to: "/about", label: "About" },
+    { to: "/getpublicStories", label: "Public Stories" },
     { to: "/features", label: "Features" },
     ...(isAdmin ? [{ to: "/admin/dashboard", label: "Admin Panel" }] : []),
     ...(isLoggedIn ? [{ to: "/user/dashboard", label: "Dashboard" }] : []),
