@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getPublicStories } from "../services/storyServices";
+import Footer from "./Footer";
 
 const Stories = () => {
   const [stories, setStories] = useState([]);
@@ -26,7 +27,8 @@ const Stories = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <>
+    <div className="min-h-screen bg-gray-50 py-12  ">
       {/* Header Section */}
       <div className="max-w-7xl mx-auto text-center mb-12">
         <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
@@ -129,7 +131,7 @@ const Stories = () => {
           </div>
 
           {/* Pagination */}
-          <div className="mt-16 flex items-center justify-center gap-4">
+          <div className="mt-16 flex items-center justify-center gap-4 mb-28">
             <button
               disabled={page === 1}
               onClick={() => setPage(page - 1)}
@@ -148,9 +150,13 @@ const Stories = () => {
               Next
             </button>
           </div>
+          
         </div>
       )}
+      
     </div>
+    <Footer/>
+    </>
   );
 };
 

@@ -36,3 +36,19 @@ export const getPublicStories = asyncHandler(async (req, res) => {
     new ApiResponse(200, stories, "Public stories fetched successfully")
   );
 });
+
+
+export const getStoryById = asyncHandler(async (req, res) => {
+  const story = await Story.findById(req.params.id)
+    .populate("userId", "fullName avatar");
+
+  if (!story) {
+    return res
+      .status(404)
+      .json(new ApiResponse(404, null, "Story not found"));
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, story, "Story fetched successfully"));
+});

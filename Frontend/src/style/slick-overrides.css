@@ -1,0 +1,27 @@
+/* Ensure equal height slides */
+.slick-track {
+  display: flex !important;
+}
+
+.slick-slide {
+  height: auto !important;
+}
+
+.slick-slide > div {
+  height: 100%;
+}
+
+/* Space between dots */
+.slick-dots {
+  bottom: -35px;
+}
+
+/* Better dot visibility on dark bg */
+.slick-dots li button:before {
+  color: #94a3b8; /* slate-400 */
+  font-size: 10px;
+}
+
+.slick-dots li.slick-active button:before {
+  color: #38bdf8; /* sky-400 */
+}

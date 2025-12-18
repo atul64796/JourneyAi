@@ -13,6 +13,9 @@ import ChangePassword from "./components/update-Account/ChangePassword";
 import ProtectedRoute from "./components/ProtectRoute";
 import AdminRoute from "./components/ProtectRoute/AdminRoute";
 import Stories from "./components/Stories";
+import Features from "./components/Features";
+import History from "./components/History";
+import StoryView from "./components/StoryView";
 
 /* -----------------------------
    Layout Wrapper
@@ -40,13 +43,23 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/features" element={<Features />} />
+          
 
           {/* User protected routes */}
           <Route
-            path="/user/dashboard"
+            path="/user/generateStories"
             element={
               <ProtectedRoute>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/history"
+            element={
+              <ProtectedRoute>
+                <History/>
               </ProtectedRoute>
             }
           />
@@ -76,6 +89,16 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          
+<Route
+  path="/stories/:id"
+  element={
+    <ProtectedRoute>
+      <StoryView />
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="/changePassword"

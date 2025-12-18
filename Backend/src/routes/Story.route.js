@@ -5,17 +5,16 @@ import {
   toggleStoryVisibilityService,
 } from "../Service/Gemni.service.js";
 
-import { getPublicStories } from "../controllers/story.controller.js";
-
+import { getPublicStories ,getStoryById} from "../controllers/story.controller.js";
 import { verifyJwt } from "../middlewares/authmiddleware.js";
+import History from "../models/historySchema.js";
 
 const router = express.Router();
 
-// Get Public stories
+/* ---------------- PUBLIC STORIES ---------------- */
 router.get("/public", getPublicStories);
 
-// CREATE STORY (AUTH REQUIRED)
-
+/* ---------------- CREATE STORY ---------------- */
 router.post("/", verifyJwt, async (req, res) => {
   try {
     const story = await createStoryServices({
@@ -26,6 +25,13 @@ router.post("/", verifyJwt, async (req, res) => {
       language: req.body.language,
       templateStyle: req.body.templateStyle,
       isPublic: req.body.isPublic,
+    });
+
+    // 🔥 CREATE HISTORY
+    await History.create({
+      userId: req.user._id,
+      storyId: story._id,
+      action: "create",
     });
 
     res.status(201).json({
@@ -41,12 +47,18 @@ router.post("/", verifyJwt, async (req, res) => {
   }
 });
 
-
-// REGENERATE STORY
-
+/* ---------------- REGENERATE STORY ---------------- */
 router.post("/:storyId/regenerate", verifyJwt, async (req, res) => {
   try {
     const story = await regenerateStoryService(req.params.storyId);
+
+    // 🔥 CREATE HISTORY
+    await History.create({
+      userId: req.user._id,
+      storyId: story._id,
+      action: "regenerate",
+      regenerateCount: story.regenerateCount,
+    });
 
     res.status(200).json({
       success: true,
@@ -61,9 +73,7 @@ router.post("/:storyId/regenerate", verifyJwt, async (req, res) => {
   }
 });
 
-
-// TOGGLE STORY VISIBILITY
-
+/* ---------------- TOGGLE VISIBILITY ---------------- */
 router.patch("/:storyId/visibility", verifyJwt, async (req, res) => {
   try {
     const { isPublic } = req.body;
@@ -80,6 +90,13 @@ router.patch("/:storyId/visibility", verifyJwt, async (req, res) => {
       isPublic
     );
 
+    // 🔥 OPTIONAL HISTORY (keep or remove)
+    await History.create({
+      userId: req.user._id,
+      storyId: story._id,
+      action: "visibility_change",
+    });
+
     res.status(200).json({
       success: true,
       message: "Story visibility updated",
@@ -92,8 +109,7 @@ router.patch("/:storyId/visibility", verifyJwt, async (req, res) => {
     });
   }
 });
-
-
-
+//get your story id
+router.get("/:id", verifyJwt, getStoryById);
 
 export default router;

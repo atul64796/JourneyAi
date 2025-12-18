@@ -103,15 +103,22 @@ export const deleteFeedback = asyncHandler(async (req, res) => {
 
 export const getSomeFeedbacktoUser = asyncHandler(async (req, res) => {
   const feedbacks = await Feedback.find()
-    .populate("user", "fullName","avatar")
+    .populate("user", "fullName avatar") // ✅ fixed
     .populate("storyId", "destination")
     .sort({ createdAt: -1 })
-    .limit(7);
     
+
   return res
     .status(200)
-    .json(new ApiResponse(200, feedbacks, "Latest 7 feedback fetched successfully"));
+    .json(
+      new ApiResponse(
+        200,
+        feedbacks,
+        "Latest 7 feedback fetched successfully"
+      )
+    );
 });
+
 
 
 

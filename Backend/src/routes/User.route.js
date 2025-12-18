@@ -11,8 +11,7 @@ import {
 import {Router} from "express";
 import {verifyJwt} from "../middlewares/authmiddleware.js"
 import { upload } from "../middlewares/multer.middlewares.js";
-import { asyncHandler } from "../utils/AsyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
+
 
 const router = Router();
 

@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import storyRoutes from "./routes/Story.route.js"
 import adminRoutes from "./routes/admin.route.js";
 import feedbackroute from "./routes/feedback.route.js"
+import History from './routes/history.route.js';
 import path from "path";
 
 
@@ -41,6 +42,8 @@ app.use("/j1/v1/user", User);
 app.use("/j1/v1/stories",storyRoutes)
 
 app.use("/j1/v1/feedback",feedbackroute)
+
+app.use("/j1/v1/history",History)
 
 //admin
 app.use("/j1/v1/admin",adminRoutes)

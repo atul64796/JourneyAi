@@ -12,13 +12,16 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
     "axios": "^1.13.2",
+    "framer-motion": "^12.23.26",
     "lucide-react": "^0.561.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-hook-form": "^7.68.0",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.10.1",
+    "react-slick": "^0.31.0",
     "recharts": "^3.6.0",
+    "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.26.4",
     "tailwindcss": "^4.1.17"
   },

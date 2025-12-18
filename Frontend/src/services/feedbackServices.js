@@ -39,3 +39,8 @@ export const deleteFeedback = (id) => {
     },
   });
 };
+
+
+export const getSomeFeedback = () => {
+  return api.get("feedback/getsomefeedback");
+};

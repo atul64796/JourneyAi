@@ -3,6 +3,7 @@ import {
     getMyFeedback,
     updateFeedback,
     deleteFeedback,
+    getSomeFeedbacktoUser
 } from "../controllers/feedback.controller.js";
 
 import { verifyJwt } from "../middlewares/authmiddleware.js";
@@ -17,5 +18,6 @@ router.post("/",createFeedback)
 router.post("/me",getMyFeedback)
 router.patch("/:feedbackId",updateFeedback)
 router.delete("/:feedbackId",deleteFeedback)
+router.get("/getsomefeedback",getSomeFeedbacktoUser)
 
 export default router;
