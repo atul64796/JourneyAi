@@ -1,29 +1,28 @@
-import React, { useState, useContext } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import {
-  FaPlaneDeparture,
-  FaBars,
-  FaTimes,
-} from "react-icons/fa";
+import React, { useState, useContext, useEffect } from "react";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { FaPlaneDeparture, FaBars, FaTimes, FaUser, FaHistory, FaSignOutAlt, FaMagic } from "react-icons/fa";
 import { AvatarContext } from "../context/AvatarProvider";
 
 export default function Navbar() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { avatar } = useContext(AvatarContext);
 
-  // Safe localStorage read
+  // Handle scroll effect for navbar background
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const storedUser = localStorage.getItem("user");
   let user = null;
-
   if (storedUser && storedUser !== "undefined") {
-    try {
-      user = JSON.parse(storedUser);
-    } catch {
-      user = null;
-    }
+    try { user = JSON.parse(storedUser); } catch { user = null; }
   }
 
   const isLoggedIn = !!user;
@@ -36,7 +35,7 @@ export default function Navbar() {
   };
 
   const handleFeaturesClick = () => {
-    if (window.location.pathname === "/") {
+    if (location.pathname === "/") {
       scrollToSection("features");
     } else {
       navigate("/");
@@ -45,212 +44,136 @@ export default function Navbar() {
   };
 
   const logout = () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
+    localStorage.clear();
     setAccountOpen(false);
     setMenuOpen(false);
     navigate("/login");
   };
 
-  const userInitial =
-    (user?.fullName?.[0] || user?.email?.[0] || "U").toUpperCase();
-
   const navLinkClass = ({ isActive }) =>
-    `block px-4 py-2 rounded-md transition-colors ${
-      isActive ? "text-yellow-400" : "text-white hover:text-yellow-400"
+    `relative px-3 py-2 text-sm font-medium transition-all duration-300 hover:text-violet-400 ${
+      isActive ? "text-violet-400" : "text-slate-200"
     }`;
 
   return (
-    <nav className="w-full bg-gradient-to-r from-[#0d0f2d] via-[#1a1440] to-[#2b0f52] text-white shadow-md ">
-      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 ">
-        <div className="flex justify-between  items-center h-16   ">
-          {/* Logo */}
-          <NavLink to="/" className="flex items-center gap-2 ">
-            <FaPlaneDeparture className="text-2xl text-purple-600 " />
-            <span className="font-bold text-2xl text-yellow-500 ">
-              Journey Ai
+    <nav className={`fixed w-full z-50 transition-all duration-500 ${scrolled ? "top-2 px-4" : "top-0 px-0"}`}>
+      <div className={`mx-auto transition-all duration-500 max-w-7xl 
+        ${scrolled 
+          ? "bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-2xl shadow-2xl" 
+          : "bg-transparent"}`}>
+        
+        <div className="flex justify-between items-center h-16 px-6 lg:px-8">
+          
+          {/* Logo Section */}
+          <NavLink to="/" className="flex items-center gap-2 group">
+            <div className="p-2 bg-violet-600 rounded-lg group-hover:rotate-12 transition-transform">
+              <FaPlaneDeparture className="text-xl text-white" />
+            </div>
+            <span className="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+              Journey<span className="text-violet-500">Ai</span>
             </span>
           </NavLink>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8 ">
-            <NavLink to="/" className={navLinkClass}>
-              Home
-            </NavLink>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center bg-slate-800/40 rounded-full px-2 py-1 border border-slate-700/50">
+              <NavLink to="/" className={navLinkClass}>Home</NavLink>
+              <NavLink to="/getpublicStories" className={navLinkClass}>Stories</NavLink>
+              <button onClick={handleFeaturesClick} className="px-3 py-2 text-sm font-medium text-slate-200 hover:text-violet-400 transition-colors">
+                Features
+              </button>
+            </div>
 
-            <NavLink to="/getpublicStories" className={navLinkClass}>
-              Public Stories
-            </NavLink>
+            <div className="h-6 w-[1px] bg-slate-700 mx-2" />
 
-            <button
-              onClick={handleFeaturesClick}
-              className="px-3 py-2 hover:text-yellow-400 transition-colors"
-            >
-              Features
-            </button>
-
-            {isAdmin && (
-              <NavLink to="/admin/dashboard" className={navLinkClass}>
-                Admin Panel
-              </NavLink>
-            )}
-
-            {isLoggedIn && (
-              <NavLink to="/user/generateStories" className={navLinkClass}>
-                Generate Stories
-              </NavLink>
-            )}
-
-            {!isLoggedIn ? (
-              <NavLink to="/login" className="text-sm">
-                Sign in
-              </NavLink>
-            ) : (
-              <div className="relative ">
-                <button
-                  onClick={() => setAccountOpen(!accountOpen)}
-                  className="flex items-center gap-2"
+            {isLoggedIn ? (
+              <div className="flex items-center gap-4">
+                <NavLink 
+                  to="/user/generateStories" 
+                  className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold rounded-full transition-all shadow-lg shadow-violet-900/20"
                 >
-                  {avatar ? (
-                    <img
-                      src={avatar}
-                      alt="profile"
-                      className="w-10 h-10 rounded-full object-cover border-3 border-gray-200/40 p-1"
-                    />
-                  ) : (
-                    <span className="w-9 h-9 flex items-center justify-center rounded-full bg-purple-600 font-semibold">
-                      {userInitial}
-                    </span>
-                  )}
-          
-                </button>
+                  <FaMagic size={12} /> Generate
+                </NavLink>
 
-                {accountOpen && (
-                  <div className="absolute right-0 top-12 w-56 bg-white rounded-xl shadow-lg z-50">
-                    <div className="px-4 py-3 border-b">
-                      <p className="text-sm font-semibold text-gray-700">
-                        {user?.fullName || user?.email}
-                      </p>
-                      {isAdmin && (
-                        <p className="text-xs text-purple-600">Admin</p>
+                {/* Profile Dropdown */}
+                <div className="relative">
+                  <button 
+                    onClick={() => setAccountOpen(!accountOpen)}
+                    className="flex items-center focus:outline-none"
+                  >
+                    <div className="p-[2px] rounded-full bg-gradient-to-tr from-violet-500 to-fuchsia-500">
+                      {avatar ? (
+                        <img src={avatar} alt="p" className="w-8 h-8 rounded-full object-cover border border-slate-900" />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-xs font-bold border border-slate-900">
+                          {user?.fullName?.[0] || "U"}
+                        </div>
                       )}
                     </div>
+                  </button>
 
-                    
-                    <NavLink
-                      to="/profile"
-                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setAccountOpen(false)}
-                    >
-                      View profile
-                    </NavLink>
-
-                    <NavLink
-                      to="/history"
-                      className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100"
-                      onClick={() => setAccountOpen(false)}
-                    >
-                      History
-                    </NavLink>
-
-                    <button
-                      onClick={logout}
-                      className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
+                  {accountOpen && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setAccountOpen(false)}></div>
+                      <div className="absolute right-0 mt-3 w-52 bg-slate-900 border border-slate-700/50 rounded-xl shadow-2xl z-20 py-2 overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="px-4 py-3 border-b border-slate-800">
+                          <p className="text-sm font-bold truncate">{user?.fullName || "User"}</p>
+                          <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
+                        </div>
+                        <DropdownItem to="/profile" icon={<FaUser />} label="Profile" onClick={() => setAccountOpen(false)} />
+                        <DropdownItem to="/history" icon={<FaHistory />} label="History" onClick={() => setAccountOpen(false)} />
+                        <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 transition-colors">
+                          <FaSignOutAlt /> Logout
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
+            ) : (
+              <NavLink to="/login" className="px-6 py-2 border border-slate-700 hover:border-violet-500 rounded-full text-sm font-semibold transition-all text-white">
+                Sign In
+              </NavLink>
             )}
           </div>
 
           {/* Mobile Toggle */}
-          <button
-            className="md:hidden text-2xl"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {menuOpen ? <FaTimes /> : <FaBars />}
+          <button className="md:hidden p-2 text-slate-300" onClick={() => setMenuOpen(!menuOpen)}>
+            {menuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
           </button>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
-        {menuOpen && (
-          <div className="md:hidden mt-2 rounded-xl bg-[#1a1440] py-4 space-y-2">
-            {isLoggedIn && (
-              <div className="px-4 pb-3 border-b border-white/10">
-                <p className="text-sm font-semibold">
-                  {user?.fullName || user?.email}
-                </p>
-                {isAdmin && (
-                  <p className="text-xs text-purple-400">Admin</p>
-                )}
-              </div>
-            )}
-
-            <NavLink
-              to="/"
-              onClick={() => setMenuOpen(false)}
-              className={navLinkClass}
-            >
-              Home
-            </NavLink>
-
-            <NavLink
-              to="/getpublicStories"
-              onClick={() => setMenuOpen(false)}
-              className={navLinkClass}
-            >
-              Public Stories
-            </NavLink>
-
-            <button
-              onClick={handleFeaturesClick}
-              className="block w-full text-left px-4 py-2 hover:text-yellow-400"
-            >
-              Features
-            </button>
-
-            {isAdmin && (
-              <NavLink
-                to="/admin/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className={navLinkClass}
-              >
-                Admin Panel
-              </NavLink>
-            )}
-
-            {isLoggedIn && (
-              <NavLink
-                to="/user/dashboard"
-                onClick={() => setMenuOpen(false)}
-                className={navLinkClass}
-              >
-                Dashboard
-              </NavLink>
-            )}
-
-            {!isLoggedIn ? (
-              <NavLink
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className={navLinkClass}
-              >
-                Sign in
-              </NavLink>
+      {/* Mobile Menu Overlay */}
+      {menuOpen && (
+        <div className="md:hidden fixed inset-0 top-16 bg-slate-950 z-40 px-6 py-8 animate-in slide-in-from-right">
+          <div className="flex flex-col gap-6">
+            <MobileLink to="/" label="Home" onClick={() => setMenuOpen(false)} />
+            <MobileLink to="/getpublicStories" label="Stories" onClick={() => setMenuOpen(false)} />
+            <button onClick={handleFeaturesClick} className="text-left text-2xl font-bold text-slate-200">Features</button>
+            {isLoggedIn && <MobileLink to="/user/generateStories" label="Generate Ai Story" onClick={() => setMenuOpen(false)} />}
+            <hr className="border-slate-800" />
+            {isLoggedIn ? (
+              <button onClick={logout} className="text-left text-2xl font-bold text-red-500">Logout</button>
             ) : (
-              <button
-                onClick={logout}
-                className="block w-full text-left px-4 py-2 text-red-400"
-              >
-                Logout
-              </button>
+              <MobileLink to="/login" label="Sign In" onClick={() => setMenuOpen(false)} />
             )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   );
 }
+
+// Helper Components
+const DropdownItem = ({ to, icon, label, onClick }) => (
+  <NavLink to={to} onClick={onClick} className="flex items-center gap-3 px-4 py-2 text-sm text-slate-300 hover:bg-violet-600/10 hover:text-violet-400 transition-colors">
+    {icon} {label}
+  </NavLink>
+);
+
+const MobileLink = ({ to, label, onClick }) => (
+  <NavLink to={to} onClick={onClick} className="text-2xl font-bold text-slate-200 hover:text-violet-500 transition-colors">
+    {label}
+  </NavLink>
+);

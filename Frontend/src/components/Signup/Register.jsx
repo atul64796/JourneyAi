@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import Swal from 'sweetalert2';
-import api from '../../services/api';
+import api from '../../services/api'; 
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Lock, Camera, Image as ImageIcon, Shield, CheckCircle2 } from 'lucide-react';
 
 function Register() {
   const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  
+  // Added 'watch' to track file input changes
+  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+
+  // Watch file fields to provide UI feedback
+  const avatarFile = watch('avatar');
+  const coverImageFile = watch('coverImage');
 
   const onSubmit = async (formData) => {
     setLoading(true);
-    setServerError('');
-
     try {
       const fd = new FormData();
       fd.append('username', formData.username);
@@ -28,105 +31,153 @@ function Register() {
       if (formData.coverImage?.[0]) fd.append('coverImage', formData.coverImage[0]);
 
       const res = await api.post('/user/register', fd);
-      const { user, accessToken, refreshToken } = res.data.data;
-
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(user));
-
-      Swal.fire('Success', 'User registered successfully', 'success');
+      Swal.fire({
+        title: 'Success',
+        text: 'Account created successfully!',
+        icon: 'success',
+        background: '#0f172a',
+        color: '#fff',
+        confirmButtonColor: '#7c3aed',
+      });
       navigate('/login');
     } catch (err) {
-      const mess = err.response?.data?.data?.message || 'Something went wrong';
-      setServerError(mess);
-      Swal.fire('Error', mess, 'error');
+      Swal.fire({
+        title: 'Error',
+        text: err.response?.data?.message || 'Something went wrong',
+        icon: 'error',
+        background: '#0f172a',
+        color: '#fff',
+      });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen flex items-start justify-center px-4 py-10 ">
-      <div className="w-full max-w-md sm:max-w-lg bg-white shadow-md rounded-lg p-6 sm:p-8">
-        <h1 className="text-3xl font-semibold mb-2">Sign Up</h1>
-        <p className="text-sm mb-3">
-          Create an account or{' '}
-          <button onClick={() => navigate('/login')} className="text-purple-600 underline">Sign in</button>
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 py-6 font-sans">
+      <div className="w-full max-w-3xl bg-[#0f172a]/40 border border-slate-800/50 rounded-[24px] p-6 md:p-8 shadow-2xl mt-20">
+        
+        {/* Header */}
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-12 h-12 bg-[#7c3aed] rounded-xl flex items-center justify-center shadow-lg mb-3">
+            <Shield size={24} className="text-white fill-white/20" />
+          </div>
+          <h1 className="text-2xl font-bold text-white">Sign Up</h1>
+          <p className="text-slate-400 text-sm mt-1">
+            Create an account or{' '}
+            <button onClick={() => navigate('/login')} className="text-[#a78bfa] hover:underline">Sign in</button>
+          </p>
+        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data" className="space-y-4">
-          <div>
-            <label className="text-sm">Username</label>
-            <input
-              type="text"
-              {...register('username', { required: 'Username is required' })}
-              className="w-full border p-2 rounded-md"
-            />
-            {errors.username && <p className="text-red-600 text-sm">{errors.username.message}</p>}
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Username */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-1">Username</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+                <input
+                  {...register('username', { required: "Username is required" })}
+                  className={`w-full bg-[#111827] border ${errors.username ? 'border-red-500' : 'border-slate-800'} rounded-lg py-2 pl-9 pr-3 text-sm text-white focus:outline-none focus:border-purple-500`}
+                  placeholder="johndoe"
+                />
+              </div>
+            </div>
+
+            {/* Full Name */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-1">Full Name</label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+                <input
+                  {...register('fullName', { required: "Full name is required" })}
+                  className={`w-full bg-[#111827] border ${errors.fullName ? 'border-red-500' : 'border-slate-800'} rounded-lg py-2 pl-9 pr-3 text-sm text-white focus:outline-none focus:border-purple-500`}
+                  placeholder="John Doe"
+                />
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label className="text-sm">Full Name</label>
-            <input
-              type="text"
-              {...register('fullName', { required: 'Full name is required' })}
-              className="w-full border p-2 rounded-md"
-            />
-            {errors.fullName && <p className="text-red-600 text-sm">{errors.fullName.message}</p>}
-          </div>
-
-          <div>
-            <label className="text-sm">Email</label>
-            <input
-              type="email"
-              {...register('email', { required: 'Email is required' })}
-              className="w-full border p-2 rounded-md"
-            />
-            {errors.email && <p className="text-red-600 text-sm">{errors.email.message}</p>}
-          </div>
-
-          <div>
-            <label className="text-sm">Password</label>
+          {/* Email */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-1">Email</label>
             <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+              <input
+                type="email"
+                {...register('email', { required: "Email is required" })}
+                className={`w-full bg-[#111827] border ${errors.email ? 'border-red-500' : 'border-slate-800'} rounded-lg py-2 pl-9 pr-3 text-sm text-white focus:outline-none focus:border-purple-500`}
+                placeholder="name@company.com"
+              />
+            </div>
+          </div>
+
+          {/* Password */}
+          <div className="space-y-1">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-1">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
               <input
                 type={showPassword ? 'text' : 'password'}
-                {...register('password', { required: 'Password is required', minLength: { value: 6, message: 'Min 6 characters' } })}
-                className="w-full border p-2 rounded-md pr-10"
+                {...register('password', { required: "Password is required", minLength: 6 })}
+                className={`w-full bg-[#111827] border ${errors.password ? 'border-red-500' : 'border-slate-800'} rounded-lg py-2 pl-9 pr-10 text-sm text-white focus:outline-none focus:border-purple-500`}
+                placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-2 flex items-center text-gray-500"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white"
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
               </button>
             </div>
-            {errors.password && <p className="text-red-600 text-sm">{errors.password.message}</p>}
           </div>
 
-          <div className="flex flex-col sm:flex-row ">
-            <div className="flex-1 w-1/2">
-              <label className="text-sm">Avatar</label>
-              <input type="file" {...register('avatar')} accept="image/*" />
-            </div>
-            <div className="flex-1 w-1/2">
-              <label className="text-sm">Cover Image</label>
-              <input type="file" {...register('coverImage')} accept="image/*" />
-            </div>
+          {/* File Uploads Section */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Avatar Upload */}
+            <label className={`relative flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer transition-all ${avatarFile?.[0] ? 'border-green-500/50 bg-green-500/5' : 'border-slate-800 hover:bg-slate-800/30'}`}>
+              {avatarFile?.[0] ? (
+                <CheckCircle2 size={20} className="text-green-500 mb-1" />
+              ) : (
+                <Camera size={20} className="text-slate-500 mb-1" />
+              )}
+              <span className={`text-[10px] font-medium text-center px-2 truncate w-full ${avatarFile?.[0] ? 'text-green-400' : 'text-slate-500'}`}>
+                {avatarFile?.[0] ? avatarFile[0].name : "Upload Avatar"}
+              </span>
+              <input type="file" {...register('avatar')} className="hidden" accept="image/*" />
+            </label>
+
+            {/* Cover Image Upload */}
+            <label className={`relative flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer transition-all ${coverImageFile?.[0] ? 'border-green-500/50 bg-green-500/5' : 'border-slate-800 hover:bg-slate-800/30'}`}>
+              {coverImageFile?.[0] ? (
+                <CheckCircle2 size={20} className="text-green-500 mb-1" />
+              ) : (
+                <ImageIcon size={20} className="text-slate-500 mb-1" />
+              )}
+              <span className={`text-[10px] font-medium text-center px-2 truncate w-full ${coverImageFile?.[0] ? 'text-green-400' : 'text-slate-500'}`}>
+                {coverImageFile?.[0] ? coverImageFile[0].name : "Upload Cover"}
+              </span>
+              <input type="file" {...register('coverImage')} className="hidden" accept="image/*" />
+            </label>
           </div>
 
-          {serverError && <p className="text-red-600 text-sm">{serverError}</p>}
-
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-indigo-700 text-white p-3 rounded-full"
+            className="w-full bg-[#7c3aed] hover:bg-[#6d28d9] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all text-sm active:scale-[0.98] mt-2 shadow-lg shadow-purple-500/20"
           >
-            {loading ? 'Creating...' : 'Signup'}
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                Processing...
+              </span>
+            ) : "Create Account"}
           </button>
-
-          <p className="text-xs text-gray-400 text-center">
-            By signing up, you accept our terms of service and privacy policy
-          </p>
         </form>
       </div>
     </div>

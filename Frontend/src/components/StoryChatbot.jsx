@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { chatWithTravelBot } from "../services/chatbotService";
+import { FaMicrophone } from "react-icons/fa";
+import { IoSend } from "react-icons/io5";
+
+
 
 const StoryChatbot = ({ storyId }) => {
   const [message, setMessage] = useState("");
@@ -143,7 +147,7 @@ const StoryChatbot = ({ storyId }) => {
      ✨ UI
   ======================= */
   return (
-    <div className="w-full max-w-md h-[680px] mx-auto rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-indigo-900 via-black to-purple-900 text-white flex flex-col ">
+    <div className="w-full  h-[680px] mx-auto rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-indigo-900 via-black to-purple-900 text-white flex flex-col  ">
 
       {/* Header */}
       <div className="px-6 py-4 bg-white/10 backdrop-blur flex justify-between items-center">
@@ -198,7 +202,7 @@ const StoryChatbot = ({ storyId }) => {
               : "bg-indigo-600 hover:bg-indigo-500"
           }`}
         >
-          🎤
+          <FaMicrophone />
         </button>
 
         <input
@@ -211,9 +215,9 @@ const StoryChatbot = ({ storyId }) => {
 
         <button
           onClick={() => handleSend()}
-          className="px-4 py-2 rounded-full bg-indigo-600"
+          className="px-4 py-4 rounded-full bg-indigo-600"
         >
-          ➤
+          <IoSend />
         </button>
       </div>
     </div>

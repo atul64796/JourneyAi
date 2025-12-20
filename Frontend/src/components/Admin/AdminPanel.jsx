@@ -14,13 +14,27 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import { 
+  Users, 
+  MessageSquare, 
+  LayoutDashboard, 
+  LogOut, 
+  ShieldAlert, 
+  CheckCircle, 
+  Trash2, 
+  Reply,
+  Ban
+} from "lucide-react";
 
-
-const Card = ({ children, title, className = "" }) => (
-  <div className={`bg-gray-100 rounded-2xl shadow-sm border border-gray-100 overflow-hidden ${className}`}>
+// Modern Dark Card Component
+const Card = ({ children, title, icon: Icon, className = "" }) => (
+  <div className={`bg-slate-900/40 backdrop-blur-md rounded-3xl border border-slate-800 shadow-xl overflow-hidden transition-all hover:border-slate-700 ${className}`}>
     {title && (
-      <div className="px-6 py-4 border-b border-gray-50">
-        <h3 className="font-bold text-gray-700">{title}</h3>
+      <div className="px-6 py-5 border-b border-slate-800 flex items-center justify-between">
+        <h3 className="font-bold text-slate-100 flex items-center gap-2 text-sm uppercase tracking-wider">
+          {Icon && <Icon size={18} className="text-indigo-400" />}
+          {title}
+        </h3>
       </div>
     )}
     <div className="p-6">{children}</div>
@@ -29,31 +43,33 @@ const Card = ({ children, title, className = "" }) => (
 
 const Badge = ({ children, variant = "gray" }) => {
   const styles = {
-    green: "bg-emerald-200 text-emerald-700 ",
-    red: "bg-rose-100 text-rose-700",
-    yellow: "bg-amber-100 text-amber-700",
-    blue: "bg-blue-100 text-blue-700",
-    gray: "bg-gray-100 text-gray-600",
+    green: "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20",
+    red: "bg-rose-500/10 text-rose-400 border border-rose-500/20",
+    yellow: "bg-amber-500/10 text-amber-400 border border-amber-500/20",
+    blue: "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20",
+    gray: "bg-slate-700/50 text-slate-400 border border-slate-600/50",
   };
   return (
-    <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold ${styles[variant]}`}>
+    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${styles[variant]}`}>
       {children}
     </span>
   );
 };
 
-const IconButton = ({ children, onClick, variant = "primary" }) => {
-  const base = "px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-95";
+const IconButton = ({ children, onClick, variant = "primary", icon: Icon }) => {
+  const base = "flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 active:scale-95";
   const styles = {
-    primary: "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm",
-    secondary: "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50",
-    danger: "bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white",
+    primary: "bg-indigo-600 text-white hover:bg-indigo-500 shadow-lg shadow-indigo-600/20",
+    secondary: "bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700",
+    danger: "bg-rose-500/10 text-rose-500 hover:bg-rose-500 hover:text-white border border-rose-500/20",
   };
-  return <button onClick={onClick} className={`${base} ${styles[variant]}`}>{children}</button>;
+  return (
+    <button onClick={onClick} className={`${base} ${styles[variant]}`}>
+      {Icon && <Icon size={14} />}
+      {children}
+    </button>
+  );
 };
-
-
-  //  ADMIN PANEL
 
 export default function AdminPanel() {
   const navigate = useNavigate();
@@ -64,18 +80,18 @@ export default function AdminPanel() {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  
-  const COLORS = ["#10b985", "#f59e0b", "#ef4444"];
+  const COLORS = ["#10b981", "#f59e0b", "#f43f5e"];
 
-  // LOGOUT LOGIC
   const handleLogout = () => {
     Swal.fire({
       title: "Logout?",
       text: "You will be redirected to the login page.",
       icon: "question",
+      background: "#0f172a",
+      color: "#f8fafc",
       showCancelButton: true,
-      confirmButtonColor: "#4f46e5",
-      cancelButtonColor: "#94a3b8",
+      confirmButtonColor: "#6366f1",
+      cancelButtonColor: "#334155",
       confirmButtonText: "Yes, logout"
     }).then((result) => {
       if (result.isConfirmed) {
@@ -91,7 +107,6 @@ export default function AdminPanel() {
       return;
     }
     loadData();
-    
   }, []);
 
   const loadData = async () => {
@@ -104,28 +119,22 @@ export default function AdminPanel() {
       setUsers(uRes.data.data || []);
       setFeedbacks(fRes.data.data || []);
     } catch (err) {
-      Swal.fire("Error", "Failed to load admin data. Check your connection.", "error");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to load admin data.",
+        background: "#0f172a",
+        color: "#f8fafc"
+      });
     } finally {
       setLoading(false);
     }
   };
 
- 
-    //  ACTION LOGIC
- 
-
   const toggleBan = async (id) => {
     try {
       await api.patch(`/admin/users/${id}/ban`, {}, {
         headers: { Authorization: `Bearer ${token}` },
-      });
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
-        title: 'User restriction updated',
-        showConfirmButton: false,
-        timer: 2000
       });
       loadData();
     } catch (error) {
@@ -140,7 +149,7 @@ export default function AdminPanel() {
       });
       loadData();
     } catch (error) {
-      Swal.fire("Error", "Failed to toggle account status", "error");
+      Swal.fire("Error", "Failed to toggle status", "error");
     }
   };
 
@@ -148,20 +157,17 @@ export default function AdminPanel() {
     const { value: text } = await Swal.fire({
       title: "Feedback Response",
       input: "textarea",
+      background: "#0f172a",
+      color: "#f8fafc",
       inputPlaceholder: "Type your response here...",
       showCancelButton: true,
       confirmButtonText: 'Send Response',
-      confirmButtonColor: '#4f46e5'
+      confirmButtonColor: '#6366f1'
     });
 
     if (text) {
       try {
-        await api.patch(
-          `/admin/feedback/${id}/respond`,
-          { response: text, status: "reviewed" },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        Swal.fire("Success", "Response sent to user", "success");
+        await api.patch(`/admin/feedback/${id}/respond`, { response: text, status: "reviewed" }, { headers: { Authorization: `Bearer ${token}` } });
         loadData();
       } catch (error) {
         Swal.fire("Error", "Failed to send response", "error");
@@ -172,18 +178,17 @@ export default function AdminPanel() {
   const deleteFeedback = async (id) => {
     const result = await Swal.fire({
       title: "Delete Feedback?",
-      text: "You won't be able to revert this!",
       icon: "warning",
+      background: "#0f172a",
+      color: "#f8fafc",
       showCancelButton: true,
-      confirmButtonColor: "#e11d48",
+      confirmButtonColor: "#f43f5e",
       confirmButtonText: "Yes, delete it!"
     });
 
     if (result.isConfirmed) {
       try {
-        await api.delete(`/admin/feedback/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await api.delete(`/admin/feedback/${id}`, { headers: { Authorization: `Bearer ${token}` } });
         loadData();
       } catch (error) {
         Swal.fire("Error", "Deletion failed", "error");
@@ -191,9 +196,6 @@ export default function AdminPanel() {
     }
   };
 
-  
-    //  CHART COMPUTATIONS
- 
   const userChart = useMemo(() => [
     { name: "Active", value: users.filter(u => u.accountStatus === "active" && !u.isBanned).length },
     { name: "Inactive", value: users.filter(u => u.accountStatus === "deactivated").length },
@@ -206,117 +208,109 @@ export default function AdminPanel() {
   ], [feedbacks]);
 
   if (loading) return (
-    <div className="flex h-screen items-center justify-center bg-gray-50">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+    <div className="flex h-screen items-center justify-center bg-[#0f172a]">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] flex font-sans">
+    <div className="min-h-screen bg-[#020617] text-slate-200 flex font-sans">
       {/* SIDEBAR */}
-     {/* SIDEBAR */}
-      <aside className="w-64 bg-slate-900 text-slate-300 flex flex-col sticky top-0 h-screen shadow-2xl">
+      <aside className="w-72 bg-slate-950 border-r border-slate-900 flex flex-col sticky top-0 h-screen">
         <div className="p-8">
-          <h2 className="text-white text-2xl font-black tracking-tight">JOURNEY <span className="text-indigo-400">AI</span></h2>
+          <h2 className="text-white text-2xl font-black tracking-tighter flex items-center gap-2">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-600/30">
+              <ShieldAlert size={18} />
+            </div>
+            JOURNEY <span className="text-indigo-500">AI</span>
+          </h2>
         </div>
         
         <nav className="flex-1 px-4 space-y-2">
-          <div className="bg-indigo-600/10 text-indigo-400 flex items-center p-3 rounded-xl cursor-pointer">
+          <div className="bg-indigo-600/10 text-indigo-400 flex items-center gap-3 p-3 rounded-2xl cursor-pointer">
+            <LayoutDashboard size={20} />
             <span className="font-bold">Dashboard</span>
           </div>
-          <div className="hover:bg-slate-800 hover:text-white flex items-center p-3 rounded-xl cursor-pointer transition-colors">
-            <span>Users Management</span>
+          <div className="hover:bg-slate-900 hover:text-white flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all text-slate-500">
+            <Users size={20} />
+            <span>Users</span>
           </div>
-          <div className="hover:bg-slate-800 hover:text-white flex items-center p-3 rounded-xl cursor-pointer transition-colors">
+          <div className="hover:bg-slate-900 hover:text-white flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all text-slate-500">
+            <MessageSquare size={20} />
             <span>Feedback</span>
           </div>
         </nav>
 
-        {/* BOTTOM SECTION: ADMIN ACCOUNT & LOGOUT */}
-        <div className="p-4 border-t border-slate-800 space-y-4">
-          {/* Admin Account Info */}
-          <div className="flex items-center gap-3 p-2 bg-slate-800/50 rounded-xl border border-slate-700">
-            <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center text-white font-bold shrink-0">
+        <div className="p-6 border-t border-slate-900">
+          <div className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-2xl border border-slate-800 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg shadow-indigo-500/10">
               {user?.email?.charAt(0).toUpperCase() || "A"}
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-bold text-white truncate">{user?.email?.split('@')[0]}</p>
-              <p className="text-[10px] text-slate-500 truncate uppercase tracking-widest">Administrator</p>
+              <p className="text-[10px] text-indigo-400 uppercase tracking-widest font-black">Admin</p>
             </div>
           </div>
 
-          {/* Logout Button */}
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 p-3 text-rose-400 hover:bg-rose-500/10 rounded-xl transition-all font-semibold group"
-          >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-5 w-5 transition-transform group-hover:translate-x-1" 
-              fill="none" viewBox="0 0 24 24" stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
+          <button onClick={handleLogout} className="w-full flex items-center gap-3 p-3 text-rose-400 hover:bg-rose-500/10 rounded-2xl transition-all font-bold group">
+            <LogOut size={18} className="group-hover:translate-x-1 transition-transform" />
             Logout
           </button>
         </div>
       </aside>
 
       {/* MAIN CONTENT */}
-      <main className="flex-1 p-10 overflow-y-auto">
-        <header className="mb-10 flex justify-between items-end">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">Admin Dashboard</h1>
-            <p className="text-slate-500 mt-1">System overview and management panel.</p>
-          </div>
-          <Badge variant="blue">Admin: {user?.email}</Badge>
+      <main className="flex-1 p-8 lg:p-12 overflow-y-auto">
+        <header className="mb-12">
+          <h1 className="text-4xl font-black text-white tracking-tight italic">System Overview</h1>
+          <p className="text-slate-500 mt-2 font-medium">Welcome back, Administrator.</p>
         </header>
 
         {/* TOP STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <Card className="border-l-5 border-l-indigo-500">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Users</p>
-            <p className="text-4xl font-black text-slate-800 mt-2">{users.length}</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <Card className="relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Users size={64} className="text-indigo-400" />
+            </div>
+            <p className="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">Total Users</p>
+            <p className="text-5xl font-black text-white mt-4 tracking-tighter">{users.length}</p>
           </Card>
-          <Card className="border-l-5 border-l-amber-500">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Feedback</p>
-            <p className="text-4xl font-black text-slate-800 mt-2">
+          <Card className="relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+              <MessageSquare size={64} className="text-amber-400" />
+            </div>
+            <p className="text-xs font-black text-slate-500 uppercase tracking-[0.2em]">Pending Feedback</p>
+            <p className="text-5xl font-black text-white mt-4 tracking-tighter">
               {feedbacks.filter(f => f.status === "pending").length}
             </p>
           </Card>
         </div>
 
-        {/* USER SECTION */}
-        <div className="grid lg:grid-cols-3 gap-8 mb-10 ">
-          <Card className="lg:col-span-2 " title="User Management" >
-            <div className="overflow-x-auto ">
-              <table className="w-full text-left border-collapse">
+        {/* SECTION: USERS */}
+        <div className="grid lg:grid-cols-3 gap-8 mb-12">
+          <Card className="lg:col-span-2" title="User Management" icon={Users}>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
                 <thead>
-                  <tr className="text-slate-400 text-xs uppercase font-bold border-b border-gray-50">
+                  <tr className="text-slate-500 text-[10px] uppercase tracking-[0.2em] font-black border-b border-slate-800">
                     <th className="pb-4">Email Address</th>
                     <th className="pb-4">Status</th>
-                    <th className="pb-4 text-right">Actions</th>
+                    <th className="pb-4 text-right">Control</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-slate-800/50">
                   {users.map((u) => (
-                    <tr key={u._id} className="group hover:bg-slate-50/50 transition-colors">
-                      <td className="py-4 font-medium text-slate-700">{u.email}</td>
-                      <td className="py-4">
-                        {u.isBanned ? (
-                          <Badge variant="red">Banned</Badge>
-                        ) : u.accountStatus === "active" ? (
-                          <Badge variant="green">Active</Badge>
-                        ) : (
-                          <Badge variant="gray">Inactive</Badge>
-                        )}
+                    <tr key={u._id} className="group hover:bg-slate-800/30 transition-colors">
+                      <td className="py-5 font-semibold text-slate-300 text-sm">{u.email}</td>
+                      <td className="py-5">
+                        {u.isBanned ? <Badge variant="red">Banned</Badge> : u.accountStatus === "active" ? <Badge variant="green">Active</Badge> : <Badge variant="gray">Inactive</Badge>}
                       </td>
-                      <td className="py-4 text-right space-x-2">
-                        <IconButton onClick={() => toggleBan(u._id)} variant={u.isBanned ? "secondary" : "danger"}>
+                      <td className="py-5 text-right flex justify-end gap-2">
+                        <IconButton onClick={() => toggleBan(u._id)} variant={u.isBanned ? "secondary" : "danger"} icon={Ban}>
                           {u.isBanned ? "Unban" : "Ban"}
                         </IconButton>
-                        <IconButton variant="secondary" onClick={() => toggleStatus(u._id)}>
-                          Toggle Status
+                        <IconButton variant="secondary" onClick={() => toggleStatus(u._id)} icon={CheckCircle}>
+                          Swap
                         </IconButton>
                       </td>
                     </tr>
@@ -326,60 +320,56 @@ export default function AdminPanel() {
             </div>
           </Card>
 
-          <Card title="Status Breakdown">
-            <div className="h-[200px] w-full">
+          <Card title="Status Breakdown" icon={LayoutDashboard}>
+            <div className="h-[250px] w-full mt-4">
               <ResponsiveContainer>
                 <PieChart>
-                  <Pie data={userChart} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+                  <Pie data={userChart} innerRadius={70} outerRadius={90} paddingAngle={8} dataKey="value">
                     {userChart.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                  />
+                  <Tooltip contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px' }} />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex flex-wrap justify-center gap-4 text-[10px] font-bold text-slate-500 mt-4">
-                 <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500"></span> ACTIVE</div>
-                 <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500"></span> INACTIVE</div>
-                 <div className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-500"></span> BANNED</div>
+              <div className="flex justify-center gap-6 text-[9px] font-black text-slate-500 mt-6 tracking-widest uppercase">
+                <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-emerald-500" /> Active</span>
+                <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500" /> Inactive</span>
+                <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-rose-500" /> Banned</span>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* FEEDBACK SECTION */}
+        {/* SECTION: FEEDBACK */}
         <div className="grid lg:grid-cols-3 gap-8">
-          <Card className="lg:col-span-2" title="User Feedback Queue">
+          <Card className="lg:col-span-2" title="User Feedback Queue" icon={MessageSquare}>
             <div className="space-y-4">
-              {feedbacks.length === 0 && <p className="text-slate-400 italic">No feedback entries found.</p>}
+              {feedbacks.length === 0 && <p className="text-slate-500 italic text-sm text-center py-10">All clear! No feedback pending.</p>}
               {feedbacks.map((f) => (
-                <div key={f._id} className="p-4 rounded-xl border border-gray-100 bg-gray-50/30 flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div key={f._id} className="p-5 rounded-2xl border border-slate-800 bg-slate-800/20 hover:bg-slate-800/40 transition-all flex flex-col md:flex-row justify-between md:items-center gap-4">
                   <div>
-                    <p className="text-slate-700 text-sm">{f.comment}</p>
-                    <div className="mt-2 flex items-center gap-2">
-                      <Badge variant={f.status === "pending" ? "yellow" : "blue"}>{f.status.toUpperCase()}</Badge>
-                    </div>
+                    <p className="text-slate-300 text-sm leading-relaxed mb-3">"{f.comment}"</p>
+                    <Badge variant={f.status === "pending" ? "yellow" : "blue"}>{f.status}</Badge>
                   </div>
                   <div className="flex gap-2">
-                    <IconButton onClick={() => respondFeedback(f._id)}>Respond</IconButton>
-                    <IconButton variant="danger" onClick={() => deleteFeedback(f._id)}>Delete</IconButton>
+                    <IconButton onClick={() => respondFeedback(f._id)} icon={Reply}>Reply</IconButton>
+                    <IconButton variant="danger" onClick={() => deleteFeedback(f._id)} icon={Trash2} />
                   </div>
                 </div>
               ))}
             </div>
           </Card>
 
-          <Card title="Review Progress">
-            <div className="h-[300px] w-full">
+          <Card title="Review Progress" icon={CheckCircle}>
+            <div className="h-[300px] w-full mt-6">
               <ResponsiveContainer>
                 <BarChart data={feedbackChart}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1e293b" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#475569', fontSize: 10, fontWeight: 'bold'}} />
                   <YAxis hide />
-                  <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '12px', border: 'none' }} />
-                  <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={40} />
+                  <Tooltip cursor={{fill: '#1e293b'}} contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '12px' }} />
+                  <Bar dataKey="count" fill="#6366f1" radius={[8, 8, 0, 0]} barSize={35} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

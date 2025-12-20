@@ -1,9 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createStory, regenerateStory } from "../../services/storyServices";
-import Feedback from "../Feedback/FeedbackSection";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
+import { Sparkles, MapPin, Globe, Clock, Send, RefreshCw, Eye, BookOpen } from "lucide-react";
 
 const STORY_STORAGE_KEY = "aiStoryData";
 
@@ -14,70 +11,56 @@ function StoryResult({ storyData, onRegenerate, loading }) {
   const { destination, storyText, images = [], imageUrl } = storyData;
   const allImages = images.length ? images : imageUrl ? [imageUrl] : [];
 
-  const sliderSettings = {
-    dots: true,
-    infinite: true,
-    speed: 800,
-    autoplay: true,
-    autoplaySpeed: 4000,
-    slidesToShow: 3,
-    slidesToScroll: 1,
-    arrows: false,
-    responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 2 } },
-      { breakpoint: 640, settings: { slidesToShow: 1 } },
-    ],
-  };
-
   return (
-    <section className="bg-gradient-to-b from-[#fdf6ee] to-white py-20 px-4">
-      <div className="max-w-6xl mx-auto">
-        {/* IMAGE CAROUSEL */}
+    <section className="bg-[#05070a] py-20 px-6 animate-in fade-in duration-1000">
+      <div className="max-w-5xl mx-auto">
+        
+        {/* REPLACED SLIDER WITH STATIC GRID (No more horizontal scroll) */}
         {allImages.length > 0 && (
-          <div className="mb-16">
-            <Slider {...sliderSettings}>
-              {allImages.map((url, i) => (
-                <div key={i} className="px-2">
-                  <div className="relative h-[400px]">
-                    <img
-                      src={url}
-                      alt={`slide-${i}`}
-                      className="w-full h-full object-cover rounded-xl shadow-lg"
-                    />
-                  </div>
-                </div>
-              ))}
-            </Slider>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-16">
+            {allImages.slice(0, 3).map((url, i) => (
+              <div key={i} className="relative h-64 overflow-hidden rounded-3xl border border-white/10 group">
+                <img
+                  src={url}
+                  alt={`journey-${i}`}
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              </div>
+            ))}
           </div>
         )}
 
-        {/* STORY SECTION */}
-        <h2 className="text-4xl font-serif text-gray-800 mb-8 text-center">
-          Your Story & Experience in {destination}
-        </h2>
-
-        <div className="grid grid-cols-1 gap-10">
-          {/* STORY TEXT */}
-          <div className="bg-white rounded-2xl shadow-xl p-10">
-            <h3 className="text-xl font-semibold mb-4">Story</h3>
-            <p className="whitespace-pre-line text-gray-700 leading-relaxed">
-              {storyText}
-            </p>
-
-            <div className="text-center mt-10">
-              <button
-                onClick={onRegenerate}
-                disabled={loading}
-                className="px-10 py-3 rounded-full text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:scale-105 transition disabled:opacity-60"
-              >
-                {loading ? "Regenerating..." : "Regenerate Story"}
-              </button>
-            </div>
+        {/* STORY TEXT CARD - Now Full Width since Feedback is removed */}
+        <div className="bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-[3rem] p-8 md:p-16 shadow-2xl relative overflow-hidden">
+          {/* Subtle Background Glow */}
+          <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full pointer-events-none" />
+          
+          <div className="flex flex-col items-center text-center mb-10">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 flex items-center justify-center text-indigo-400 mb-4">
+                  <BookOpen size={24} />
+              </div>
+              <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight">
+                 Expedition to {destination}
+              </h2>
+              <div className="h-1 w-20 bg-indigo-500/30 rounded-full mt-4" />
           </div>
+          
+          <p className="whitespace-pre-line text-slate-300 leading-[2] text-xl font-serif italic text-center max-w-3xl mx-auto">
+            {storyText}
+          </p>
 
-          {/* FEEDBACK CARD */}
-          <div className="rounded-2xl p-6">
-            <Feedback storyId={storyData._id} />
+          <div className="flex justify-center mt-16 pt-10 border-t border-white/5">
+            <button
+              onClick={onRegenerate}
+              disabled={loading}
+              className="group flex items-center gap-3 px-10 py-4 rounded-2xl text-white bg-indigo-600 hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-600/20 disabled:opacity-50"
+            >
+              <RefreshCw size={20} className={loading ? "animate-spin" : "group-hover:rotate-180 transition-transform duration-500"} />
+              <span className="font-black uppercase tracking-[0.2em] text-xs">
+                  {loading ? "Re-writing..." : "Regenerate Tale"}
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -87,15 +70,6 @@ function StoryResult({ storyData, onRegenerate, loading }) {
 
 /* -------------------- Dashboard -------------------- */
 export default function Dashboard() {
-  const getInitialStory = () => {
-    try {
-      const stored = localStorage.getItem(STORY_STORAGE_KEY);
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
-  };
-
   const [formData, setFormData] = useState({
     destination: "",
     duration: "",
@@ -105,7 +79,13 @@ export default function Dashboard() {
     isPublic: false,
   });
 
-  const [story, setStory] = useState(getInitialStory);
+  const [story, setStory] = useState(() => {
+    try {
+      const stored = localStorage.getItem(STORY_STORAGE_KEY);
+      return stored ? JSON.parse(stored) : null;
+    } catch { return null; }
+  });
+  
   const [storyId, setStoryId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -122,26 +102,18 @@ export default function Dashboard() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const { destination, mood, duration, language } = formData;
-
-    if (!destination || !mood || !duration || !language) {
-      setError("Please fill out all required fields.");
+    if (!formData.destination || !formData.mood) {
+      setError("Please fill in destination and mood.");
       return;
     }
-
     setLoading(true);
     setError("");
-    setStory(null);
-
     try {
       const res = await createStory(formData);
       setStory(res.data);
       setStoryId(res.data._id);
-    } catch {
-      setError("Failed to generate story.");
-    } finally {
-      setLoading(false);
-    }
+    } catch { setError("The AI scribe is currently busy."); }
+    finally { setLoading(false); }
   };
 
   const handleRegenerateStory = async () => {
@@ -150,94 +122,119 @@ export default function Dashboard() {
     try {
       const res = await regenerateStory(storyId);
       setStory(res.data);
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  const inputStyle = "w-full p-3 border border-gray-400 rounded bg-gray-50";
-  const inputContainerStyle = "flex flex-col flex-1 min-w-[180px]";
+  const selectStyle = "w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-indigo-500/50 transition-all appearance-none cursor-pointer";
+  const labelStyle = "text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2 ml-2 block";
 
   return (
-    <div className="min-h-screen bg-[#570bd2]">
-      <div className="pt-20 pb-16">
-        <h1 className="text-4xl text-white text-center mb-12">Create Your Story</h1>
+    <div className="min-h-screen bg-[#05070a] text-slate-300">
+      {/* HEADER HERO */}
+      <div className="pt-32 pb-16 px-6 relative overflow-hidden text-center">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-indigo-600/10 blur-[120px] rounded-full" />
+        <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter mb-4 relative z-10">
+          Create Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">Stories</span>
+        </h1>
+        <p className="text-slate-500 max-w-lg mx-auto font-medium">Capture your adventure in a cinematic narrative.</p>
+      </div>
 
-        <div className="max-w-4xl mx-auto p-8 bg-white rounded-xl shadow-2xl">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className={inputContainerStyle}>
-                <label>Destination</label>
-                <input name="destination" value={formData.destination} onChange={handleChange} className={inputStyle} />
+      <div className="max-w-5xl mx-auto px-6 pb-20">
+        <div className="bg-white/[0.02] backdrop-blur-3xl border border-white/10 rounded-[3rem] p-8 md:p-12 shadow-2xl relative z-10">
+          <form onSubmit={handleSubmit} className="space-y-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div>
+                <label className={labelStyle}><MapPin size={12} className="inline mr-1"/> Destination</label>
+                <input 
+                    name="destination" 
+                    placeholder="e.g. Kyoto, Japan"
+                    value={formData.destination} 
+                    onChange={handleChange} 
+                    className="w-full p-4 bg-white/5 border border-white/10 rounded-2xl text-white outline-none focus:border-indigo-500/50 transition-all" 
+                />
               </div>
 
-              <div className={inputContainerStyle}>
-                <label>Mood</label>
-                <select name="mood" value={formData.mood} onChange={handleChange} className={inputStyle}>
-                  <option value="">Select</option>
-                  <option value="adventurous">Adventurous</option>
-                  <option value="excited">Excited</option>
-                  <option value="relaxed">Relaxed</option>
-                  <option value="romantic">Romantic</option>
-                  <option value="peaceful">Peaceful</option>
-                  <option value="mysterious">Mysterious</option>
+              <div>
+                <label className={labelStyle}><Sparkles size={12} className="inline mr-1"/> Mood</label>
+                <select name="mood" value={formData.mood} onChange={handleChange} className={selectStyle}>
+                  <option value="" className="bg-[#05070a]">Choose Mood</option>
+                  {['Adventurous', 'Relaxed', 'Romantic', 'Mysterious', 'Peaceful'].map(m => (
+                    <option key={m} value={m.toLowerCase()} className="bg-[#05070a]">{m}</option>
+                  ))}
                 </select>
               </div>
 
-              <div className={inputContainerStyle}>
-                <label>Duration</label>
-                <select name="duration" value={formData.duration} onChange={handleChange} className={inputStyle}>
-                  <option value="">Select</option>
-                  <option value="1 day">1 day</option>
-                  <option value="2 days">2 days</option>
-                  <option value="3 days">3 days</option>
-                  <option value="1 week">1 week</option>
+              <div>
+                <label className={labelStyle}><Clock size={12} className="inline mr-1"/> Duration</label>
+                <select name="duration" value={formData.duration} onChange={handleChange} className={selectStyle}>
+                  <option value="" className="bg-[#05070a]">Length</option>
+                  {['1 Day', '3 Days', '1 Week', '2 Weeks'].map(d => (
+                    <option key={d} value={d.toLowerCase()} className="bg-[#05070a]">{d}</option>
+                  ))}
                 </select>
               </div>
 
-              <div className={inputContainerStyle}>
-                <label>Language</label>
-                <select name="language" value={formData.language} onChange={handleChange} className={inputStyle}>
-                  <option value="">Select</option>
-                  <option value="english">English</option>
-                  <option value="hindi">Hindi</option>
-                  <option value="bengali">Bengali</option>
-                  <option value="marathi">Marathi</option>
-                  <option value="spanish">Spanish</option>
-                  <option value="french">French</option>
+              <div>
+                <label className={labelStyle}><Globe size={12} className="inline mr-1"/> Language</label>
+                <select name="language" value={formData.language} onChange={handleChange} className={selectStyle}>
+                  <option value="" className="bg-[#05070a]">Output</option>
+                  {['English', 'Hindi', 'Spanish', 'French'].map(l => (
+                    <option key={l} value={l.toLowerCase()} className="bg-[#05070a]">{l}</option>
+                  ))}
                 </select>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <select
-                name="templateStyle"
-                value={formData.templateStyle}
-                onChange={handleChange}
-                className="border border-gray-400 p-3 rounded w-full md:w-1/2"
-              >
-                <option value="cinematic">Cinematic</option>
-                <option value="funny">Funny</option>
-                <option value="emotional">Emotional</option>
-                <option value="thriller">Thriller</option>
-              </select>
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-6 border-t border-white/5">
+              <div className="w-full md:w-1/2">
+                <label className={labelStyle}>Narrative Style</label>
+                <div className="flex gap-2">
+                    {['Cinematic', 'Funny', 'Emotional','Thriller'].map(style => (
+                        <button
+                            key={style}
+                            type="button"
+                            onClick={() => setFormData(prev => ({...prev, templateStyle: style.toLowerCase()}))}
+                            className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border ${
+                                formData.templateStyle === style.toLowerCase() 
+                                ? "bg-indigo-600 border-indigo-500 text-white" 
+                                : "bg-white/5 border-white/10 text-slate-400 hover:border-white/20"
+                            }`}
+                        >
+                            {style}
+                        </button>
+                    ))}
+                </div>
+              </div>
 
-              <label className="flex items-center gap-2 text-md">
-                <input type="checkbox" name="isPublic" checked={formData.isPublic} onChange={handleChange} className="scale-110" />
-                Make story public
+              <label className="flex items-center gap-3 cursor-pointer group">
+                <div className={`w-12 h-6 rounded-full relative transition-all ${formData.isPublic ? "bg-indigo-600" : "bg-white/10"}`}>
+                    <input type="checkbox" name="isPublic" checked={formData.isPublic} onChange={handleChange} className="hidden" />
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${formData.isPublic ? "left-7" : "left-1"}`} />
+                </div>
+                <span className="text-xs font-bold text-slate-400 group-hover:text-white transition-colors flex items-center gap-2">
+                    <Eye size={14}/> Make Public
+                </span>
               </label>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-full text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:scale-105 transition disabled:opacity-60"
-            >
-              {loading ? "Generating..." : "Generate Story"}
-            </button>
+            <div className="flex justify-center pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full md:w-[60%] py-5 rounded-[2rem] text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:shadow-[0_0_30px_rgba(79,70,229,0.4)] hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-lg"
+              >
+                {loading ? (
+                    <RefreshCw className="animate-spin" size={20} />
+                ) : (
+                    <Send size={20} />
+                )}
+                <span className="font-black uppercase tracking-[0.2em] text-sm">
+                    {loading ? "Warping Reality..." : "Generate Tale"}
+                </span>
+              </button>
+            </div>
           </form>
-
-          {error && <p className="text-red-500 mt-4 text-center">{error}</p>}
+          {error && <p className="text-red-400 text-center mt-6 text-xs font-bold uppercase tracking-widest">{error}</p>}
         </div>
       </div>
 

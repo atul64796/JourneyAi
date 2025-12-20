@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Calendar, MapPin, Clock, Globe, ArrowLeft, Smile } from "lucide-react";
+import { Calendar, MapPin, Clock, Globe, ArrowLeft, Smile, BookOpen, MessageSquare } from "lucide-react";
 import api from "../services/api";
 import StoryChatbot from "./StoryChatbot";
 
@@ -26,121 +26,123 @@ const StoryView = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-500 font-medium">Fetching your story...</p>
+      <div className="flex flex-col justify-center items-center min-h-screen bg-[#050505]">
+        <div className="relative w-20 h-20">
+          <div className="absolute inset-0 border-4 border-indigo-500/20 rounded-full"></div>
+          <div className="absolute inset-0 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
+        <p className="mt-6 text-indigo-400 font-bold tracking-widest text-xs uppercase animate-pulse">Opening your Journal...</p>
       </div>
     );
   }
 
-  if (!story) {
-    return (
-      <div className="text-center py-20">
-        <h2 className="text-2xl font-bold text-gray-800">Story not found</h2>
-        <button
-          onClick={() => navigate(-1)}
-          className="mt-4 text-blue-600 hover:underline"
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
+  if (!story) return <div className="text-center py-20 text-white">Story not found</div>;
 
   return (
-    <article className="max-w-4xl mx-auto px-6 py-12 animate-in fade-in duration-700">
-      
-      {/* Back Button */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-gray-500 hover:text-black mb-8 transition-colors"
-      >
-        <ArrowLeft size={18} />
-        <span className="text-sm font-medium">Back to feed</span>
-      </button>
+    <div className="min-h-screen bg-[#0a0c10] text-slate-300">
+      {/* Top Navigation Bar */}
+      <nav className="sticky top-0 z-50 bg-[#0a0c10]/80 backdrop-blur-md border-b border-white/5 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <button
+            onClick={() => navigate(-1)}
+            className="group flex items-center gap-2 text-slate-400 hover:text-white transition-all"
+          >
+            <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="text-xs font-bold uppercase tracking-widest">Return</span>
+          </button>
+          <div className="flex items-center gap-3">
+             <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-[0.3em]">AI Adventure</span>
+             <div className="h-4 w-[1px] bg-white/10"></div>
+             <p className="text-sm font-medium text-white">Journey to {story.destination}</p>
+          </div>
+        </div>
+      </nav>
 
-      {/* Header */}
-      <header className="mb-10">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6">
-          My Journey to {story.destination}
-        </h1>
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b">
-          <div className="flex items-center gap-4">
-            <img
-              src={story.userId.avatar}
-              alt={story.userId.fullName}
-              className="w-14 h-14 rounded-full object-cover"
-            />
-            <div>
-              <p className="font-bold text-gray-900 text-lg">
-                {story.userId.fullName}
-              </p>
-              <div className="flex items-center gap-2 text-gray-500 text-sm">
-                <Calendar size={14} />
-                {new Date(story.createdAt).toLocaleDateString()}
+      <div className="max-w-7xl mx-auto px-6 py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          
+          {/* LEFT: STORY CONTENT (8 Columns) */}
+          <main className="lg:col-span-7 space-y-10">
+            {/* Header Badge */}
+            <div className="flex items-center gap-4">
+              <img
+                src={story.userId.avatar}
+                alt={story.userId.fullName}
+                className="w-16 h-16 rounded-2xl object-cover border-2 border-white/10 rotate-3 shadow-xl"
+              />
+              <div>
+                <h1 className="text-4xl md:text-6xl font-black text-white leading-tight tracking-tighter">
+                  {story.destination}
+                </h1>
+                <div className="flex items-center gap-3 mt-1 text-indigo-400 text-sm font-medium">
+                  <Calendar size={14} />
+                  {new Date(story.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2">
-            <Tag
-              icon={<MapPin size={14} />}
-              label={story.destination}
-              color="bg-blue-50 text-blue-700"
-            />
-            <Tag
-              icon={<Clock size={14} />}
-              label={story.duration}
-              color="bg-green-50 text-green-700"
-            />
-            <Tag
-              icon={<Smile size={14} />}
-              label={story.mood}
-              color="bg-purple-50 text-purple-700"
-            />
-            <Tag
-              icon={<Globe size={14} />}
-              label={story.language}
-              color="bg-orange-50 text-orange-700"
-            />
-          </div>
-        </div>
-      </header>
+            {/* Quick Info Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <InfoTile icon={<MapPin size={16}/>} label="Destination" value={story.destination} color="indigo" />
+              <InfoTile icon={<Clock size={16}/>} label="Duration" value={story.duration} color="emerald" />
+              <InfoTile icon={<Smile size={16}/>} label="Vibe" value={story.mood} color="amber" />
+              <InfoTile icon={<Globe size={16}/>} label="Language" value={story.language} color="sky" />
+            </div>
 
-      {/* Story Content */}
-      <div className="prose prose-lg max-w-none mb-14">
-        <div className="text-gray-800 leading-[1.8] text-lg font-serif whitespace-pre-line">
-          {story.storyText}
+            {/* The actual Story */}
+            <div className="relative group">
+               <div className="absolute -left-6 top-0 bottom-0 w-1 bg-indigo-500/20 group-hover:bg-indigo-500/50 transition-colors hidden md:block" />
+               <div className="prose prose-invert prose-lg max-w-none">
+                <p className="text-slate-300 leading-[2] text-xl font-serif whitespace-pre-line first-letter:text-6xl first-letter:font-bold first-letter:text-white first-letter:mr-3 first-letter:float-left">
+                  {story.storyText}
+                </p>
+              </div>
+            </div>
+          </main>
+
+          {/* RIGHT: CHATBOT SIDEBAR (5 Columns) */}
+          <aside className="lg:col-span-5 lg:sticky lg:top-28">
+            <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-1 shadow-2xl overflow-hidden backdrop-blur-3xl">
+              <div className="p-6 border-b border-white/5 flex items-center gap-3">
+                <div className="p-2 bg-indigo-500/20 rounded-xl">
+                  <MessageSquare className="text-indigo-400" size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">AI Companion</h3>
+                  <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Ask about logistics & culture</p>
+                </div>
+              </div>
+              
+              <div className="h-[600px] overflow-hidden">
+                <StoryChatbot storyId={story._id} />
+              </div>
+            </div>
+          </aside>
+          
         </div>
       </div>
-
-      {/* Chatbot Section */}
-      <section className="mt-14 border-t pt-8">
-        <h3 className="text-2xl font-bold mb-4 text-gray-900">
-          🤖 Ask Journey AI about this trip
-        </h3>
-
-        <p className="text-gray-500 mb-6">
-          Ask about budget, weather, culture, or best time to visit.
-        </p>
-
-        <StoryChatbot storyId={story._id} />
-      </section>
-    </article>
+    </div>
   );
 };
 
-const Tag = ({ icon, label, color }) => (
-  <span
-    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${color}`}
-  >
-    {icon}
-    {label}
-  </span>
-);
+// Sub-component for small data tiles
+const InfoTile = ({ icon, label, value, color }) => {
+  const colors = {
+    indigo: "text-indigo-400 border-indigo-500/20 bg-indigo-500/5",
+    emerald: "text-emerald-400 border-emerald-500/20 bg-emerald-500/5",
+    amber: "text-amber-400 border-amber-500/20 bg-amber-500/5",
+    sky: "text-sky-400 border-sky-500/20 bg-sky-500/5",
+  };
+  
+  return (
+    <div className={`p-4 rounded-3xl border ${colors[color]} backdrop-blur-sm`}>
+      <div className="flex items-center gap-2 mb-1 opacity-60">
+        {icon}
+        <span className="text-[9px] uppercase font-black tracking-widest">{label}</span>
+      </div>
+      <p className="text-white font-bold text-sm truncate">{value}</p>
+    </div>
+  );
+};
 
 export default StoryView;

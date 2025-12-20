@@ -5,6 +5,7 @@ import {
   updateFeedback,
   deleteFeedback,
 } from "../../services/feedbackServices";
+import { RiFeedbackFill } from "react-icons/ri";
 
 export default function FeedbackSection({ storyId }) {
   const [feedbackText, setFeedbackText] = useState("");
@@ -13,6 +14,9 @@ export default function FeedbackSection({ storyId }) {
   const [error, setError] = useState("");
   const [existingFeedback, setExistingFeedback] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  
+  // New state to control visibility
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     if (storyId) loadMyFeedback();
@@ -38,8 +42,6 @@ export default function FeedbackSection({ storyId }) {
     e.preventDefault();
     if (!feedbackText.trim()) return;
     setIsSubmitting(true);
-    setError("");
-
     try {
       if (existingFeedback && isEditing) {
         await updateFeedback(existingFeedback._id, { comment: feedbackText, rating });
@@ -48,6 +50,8 @@ export default function FeedbackSection({ storyId }) {
         setExistingFeedback(res.data?.data);
       }
       setIsEditing(false);
+      // Optional: hide after successful post
+      // setIsVisible(false); 
       await loadMyFeedback();
     } catch (err) {
       setError("Failed to submit feedback.");
@@ -56,122 +60,93 @@ export default function FeedbackSection({ storyId }) {
     }
   };
 
-  const handleDelete = async () => {
-    try {
-      await deleteFeedback(existingFeedback._id);
-      setExistingFeedback(null);
-      setFeedbackText("");
-      setRating(5);
-      setIsEditing(false);
-    } catch (err) {
-      setError("Failed to delete feedback.");
-    }
-  };
-
   return (
-    <div className="mt-8 overflow-hidden rounded-2xl border border-white/10 bg-gray-400 backdrop-blur-md shadow-xl transition-all duration-300 ">
-      {/* Header Bar */}
-      <div className=" bg-gradient-to-r from-[#ae08dc] via-[#6a0bcf] to-[#250fa0] p-3 text-white">
-        <h3 className="text-lg font-medium  flex items-center gap-2">
-          <span className="text-teal-400 text-3xl">★</span> 
-          {existingFeedback && !isEditing ? "Your Review" : "Rate your Experience"}
-        </h3>
-      </div>
-
-      <div className="p-6">
-        {/* RATING STARS */}
-        <div className="flex items-center gap-1 mb-6">
-          {[1, 2, 3, 4, 5].map((num) => (
-            <button
-              key={num}
-              type="button"
-              onClick={() => setRating(num)}
-              disabled={existingFeedback && !isEditing}
-              className={`text-2xl transition-all duration-200 ${
-                rating >= num ? "text-purple-700 scale-110" : "text-gray-700 hover:text-gray-500"
-              } ${existingFeedback && !isEditing ? "cursor-default" : "cursor-pointer hover:scale-125"}`}
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4">
+      
+      {/* 1. THE FEEDBACK PANEL (Visible only when isVisible is true) */}
+      {isVisible && (
+        <div className="mb-2 w-[90vw] md:w-[450px] overflow-hidden rounded-3xl border border-white/20 bg-slate-900/95 backdrop-blur-2xl shadow-2xl animate-in slide-in-from-bottom-10 duration-300">
+          <div className="bg-gradient-to-r from-purple-600/40 to-blue-600/40 p-4 flex justify-between items-center">
+            <h3 className="text-white font-bold flex items-center gap-2">
+              <span className="text-yellow-400"><RiFeedbackFill /></span> 
+              {existingFeedback ? "Your Review" : "Rate this Story"}
+            </h3>
+            <button 
+              onClick={() => setIsVisible(false)}
+              className="text-white/60 hover:text-white transition-colors"
             >
-              ★
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-          ))}
-          <span className="ml-3 text-md font-mono text-black ">({rating}/5)</span>
-        </div>
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative">
+          <form onSubmit={handleSubmit} className="p-5 space-y-4">
+            <div className="flex items-center gap-2 justify-center py-2 bg-white/5 rounded-2xl">
+              {[1, 2, 3, 4, 5].map((num) => (
+                <button
+                  key={num}
+                  type="button"
+                  onClick={() => setRating(num)}
+                  disabled={existingFeedback && !isEditing}
+                  className={`text-3xl transition-all ${rating >= num ? "text-yellow-400" : "text-slate-700"}`}
+                >
+                ★
+                </button>
+              ))}
+            </div>
+
             <textarea
-              className={`w-full bg-gray-300/50 border rounded-xl p-4  placeholder-gray-700 outline-none transition-all duration-300 ${
-                isEditing || !existingFeedback ? "border-gray-300   focus:border-teal-400 ring-1 ring-transparent " : "border-transparent italic text-gray-700"
-              }`}
+              className="w-full bg-slate-800/50 text-white border border-white/10 rounded-xl p-3 text-sm outline-none focus:border-purple-500 transition-all resize-none"
               rows="3"
-              placeholder="Leave a comment about the story generation..."
+              placeholder="Write your feedback..."
               value={feedbackText}
               onChange={(e) => setFeedbackText(e.target.value)}
               disabled={existingFeedback && !isEditing}
               required
             />
-          </div>
 
-          {error && <p className="text-red-400 text-xs animate-pulse">{error}</p>}
-
-          <div className="flex items-center justify-end gap-3 pt-2">
-            {!existingFeedback && (
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="group relative px-6 py-2 bg-gradient-to-r from-[#ae08dc] via-[#6a0bcf] to-[#250fa0] text-white hover:scale-105 transition-all font-bold rounded-full overflow-hidden transition-all active:scale-95"
-              >
-                <span className="relative z-10">{isSubmitting ? "Submitting..." : "Post Review"}</span>
-              </button>
-            )}
-
-            {existingFeedback && !isEditing && (
-              <div className="flex gap-2 w-full justify-between items-center">
-                <span className="text-xs text-gray-500 font-medium">Feedback submitted successfully</span>
-                <div className="flex gap-2">
-                    <button
-                    type="button"
-                    onClick={() => setIsEditing(true)}
-                    className="text-md font-semibold text-green-500 hover:text-green-400  transition-colors px-3 py-1"
-                    >
-                    Edit
-                    </button>
-                    <button
-                    type="button"
-                    onClick={handleDelete}
-                    className="text-md font-semibold text-red-600 hover:text-red-500 transition-colors px-3 py-1"
-                    >
-                    Delete
-                    </button>
-                </div>
-              </div>
-            )}
-
-            {existingFeedback && isEditing && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsEditing(false);
-                    setFeedbackText(existingFeedback.comment);
-                    setRating(existingFeedback.rating);
-                  }}
-                  className="px-5 py-2 text-black hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
+            <div className="flex justify-end gap-2">
+              {(!existingFeedback || isEditing) && (
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-6 py-2  bg-amber-400 text-black  rounded-full hover:bg-amber-500 transition-all hover:scale-105 transition-all active:scale-95"
+                  className="px-6 py-2 bg-white text-black font-bold rounded-xl hover:bg-purple-100 transition-all active:scale-95"
                 >
-                  {isSubmitting ? "Saving..." : "Update"}
+                  {isSubmitting ? "..." : existingFeedback ? "Update" : "Post"}
                 </button>
-              </>
-            )}
-          </div>
-        </form>
-      </div>
+              )}
+              {existingFeedback && !isEditing && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(true)}
+                  className="px-6 py-2 bg-white/10 text-white rounded-xl hover:bg-white/20 transition-all"
+                >
+                  Edit
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* 2. THE TRIGGER BUTTON (Floating Action Button) */}
+      <button
+        onClick={() => setIsVisible(!isVisible)}
+        className={`group flex items-center gap-3 p-4 rounded-2xl shadow-2xl transition-all duration-300 active:scale-90 ${
+          isVisible 
+            ? "bg-slate-800 text-white rotate-90" 
+            : "bg-gradient-to-br from-purple-600 to-blue-700 text-white hover:shadow-purple-500/40"
+        }`}
+      >
+        {isVisible ? (
+           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+        ) : (
+          <>
+            <span className="font-bold text-sm pl-2 group-hover:block hidden animate-in fade-in slide-in-from-right-2">Review Story</span>
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+          </>
+        )}
+      </button>
+
     </div>
   );
 }
