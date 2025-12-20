@@ -7,6 +7,8 @@ import storyRoutes from "./routes/Story.route.js"
 import adminRoutes from "./routes/admin.route.js";
 import feedbackroute from "./routes/feedback.route.js"
 import History from './routes/history.route.js';
+import travelChatbotRoutes from './routes/travelChatbot.routes.js';
+import ttsRoute from './routes/tts.route.js';
 import path from "path";
 
 
@@ -47,5 +49,10 @@ app.use("/j1/v1/history",History)
 
 //admin
 app.use("/j1/v1/admin",adminRoutes)
+
+app.use("/j1/v1/chat", travelChatbotRoutes);
+
+app.use("/j1/v1/tts", ttsRoute);
+
 
 export default app;

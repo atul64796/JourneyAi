@@ -3,7 +3,7 @@ import {
   createStoryServices,
   regenerateStoryService,
   toggleStoryVisibilityService,
-} from "../Service/Gemni.service.js";
+} from "../Service/Story.service.js";
 
 import { getPublicStories ,getStoryById} from "../controllers/story.controller.js";
 import { verifyJwt } from "../middlewares/authmiddleware.js";

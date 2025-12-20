@@ -58,7 +58,7 @@ function Home() {
               bg-gradient-to-r from-[#ae08dc] via-[#6a0bcf] to-[#250fa0]
               text-white text-sm sm:text-base font-medium
               shadow-lg hover:scale-[1.03] transition"
-              onClick={() => navigate("/user/dashboard")}
+              onClick={() => navigate("/user/generateStories")}
             >
               Start Creating Free
               <FaArrowRight />

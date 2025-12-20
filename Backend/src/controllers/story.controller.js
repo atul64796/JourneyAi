@@ -1,6 +1,6 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { createStoryServices } from "../Service/Gemni.service.js";
+import { createStoryServices } from "../Service/Story.service.js";
 
 import Story from "../models/Story.schema.js"
 
