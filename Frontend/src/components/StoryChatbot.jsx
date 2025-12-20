@@ -13,16 +13,19 @@ const StoryChatbot = ({ storyId }) => {
   const chatEndRef = useRef(null);
 
   /* =======================
-     🎤 MIC SETUP
+     🎤 SPEECH RECOGNITION
   ======================= */
   useEffect(() => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    if (!SpeechRecognition) return;
+    if (!SpeechRecognition) {
+      alert("Speech recognition works only in Chrome / Edge");
+      return;
+    }
 
     const recognition = new SpeechRecognition();
-    recognition.lang = "en-IN";
+    recognition.lang = "en-IN"; // Hindi + English
     recognition.continuous = false;
     recognition.interimResults = false;
 
@@ -32,21 +35,27 @@ const StoryChatbot = ({ storyId }) => {
       const text = e.results[0][0].transcript.trim();
       recognition.stop();
       setIsListening(false);
-      handleSend(text);
+      if (text) handleSend(text);
     };
 
+    recognition.onerror = () => setIsListening(false);
     recognition.onend = () => setIsListening(false);
+
     recognitionRef.current = recognition;
+
+    return () => recognition.stop();
   }, []);
 
   const startMic = () => {
-    if (!isListening) recognitionRef.current.start();
+    if (!isListening && recognitionRef.current) {
+      recognitionRef.current.start();
+    }
   };
 
   /* =======================
-     🔊 SPEAK (Browser TTS – FREE)
+     🔊 BROWSER VOICE (FALLBACK)
   ======================= */
-  const speak = (text) => {
+  const speakWithBrowser = (text) => {
     if (!text || isMuted) return;
 
     const utterance = new SpeechSynthesisUtterance(text);
@@ -63,13 +72,46 @@ const StoryChatbot = ({ storyId }) => {
   };
 
   /* =======================
-     💬 CHAT
+     🔊 MAIN SPEAK FUNCTION
+     (Backend → Browser fallback)
+  ======================= */
+  const speak = async (text) => {
+    if (!text || isMuted) return;
+
+    try {
+      const res = await fetch("http://localhost:8000/j1/v1/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!res.ok) throw new Error("Backend TTS failed");
+
+      const data = await res.json();
+
+      audioRef.current.src = data.audio;
+      audioRef.current.onended = () => {
+        setTimeout(() => startMic(), 300);
+      };
+
+      await audioRef.current.play();
+    } catch (err) {
+      console.warn("🔁 Backend TTS failed, switching to browser voice");
+      speakWithBrowser(text);
+    }
+  };
+
+  /* =======================
+     💬 CHAT HANDLER
   ======================= */
   const handleSend = async (textOverride) => {
     const text = textOverride || message;
     if (!text.trim() || loading) return;
 
-    setChatHistory((prev) => [...prev, { role: "user", content: text }]);
+    setChatHistory((prev) => [
+      ...prev,
+      { role: "user", content: text },
+    ]);
     setMessage("");
     setLoading(true);
 
@@ -87,7 +129,7 @@ const StoryChatbot = ({ storyId }) => {
 
       speak(res.reply);
     } catch {
-      speak("Something went wrong.");
+      speakWithBrowser("Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -98,23 +140,20 @@ const StoryChatbot = ({ storyId }) => {
   }, [chatHistory, loading]);
 
   /* =======================
-     ✨ ATTRACTIVE UI
+     ✨ UI
   ======================= */
   return (
-    <div className="w-full max-w-md h-[680px] mx-auto rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-indigo-900 via-black to-purple-900 text-white flex flex-col">
+    <div className="w-full max-w-md h-[680px] mx-auto rounded-3xl overflow-hidden shadow-2xl bg-gradient-to-br from-indigo-900 via-black to-purple-900 text-white flex flex-col ">
 
       {/* Header */}
-      <div className="px-6 py-4 backdrop-blur-md bg-white/10 flex justify-between items-center border-b border-white/10">
+      <div className="px-6 py-4 bg-white/10 backdrop-blur flex justify-between items-center">
         <div>
-          <h2 className="font-bold text-lg tracking-wide">Journey AI</h2>
+          <h2 className="font-bold text-lg">Journey AI</h2>
           <p className="text-xs opacity-70">
             {isListening ? "Listening..." : "Tap mic to speak"}
           </p>
         </div>
-        <button
-          onClick={() => setIsMuted(!isMuted)}
-          className="text-xl hover:scale-110 transition"
-        >
+        <button onClick={() => setIsMuted(!isMuted)}>
           {isMuted ? "🔇" : "🔊"}
         </button>
       </div>
@@ -129,10 +168,10 @@ const StoryChatbot = ({ storyId }) => {
             }`}
           >
             <div
-              className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm leading-relaxed ${
+              className={`max-w-[80%] px-4 py-2 rounded-2xl text-sm ${
                 msg.role === "user"
                   ? "bg-indigo-600 rounded-br-none"
-                  : "bg-white/10 backdrop-blur rounded-bl-none"
+                  : "bg-white/10 rounded-bl-none"
               }`}
             >
               {msg.content}
@@ -150,12 +189,12 @@ const StoryChatbot = ({ storyId }) => {
       </div>
 
       {/* Controls */}
-      <div className="p-5 border-t border-white/10 bg-black/30 backdrop-blur-lg flex items-center gap-3">
+      <div className="p-5 bg-black/30 backdrop-blur flex gap-3 items-center">
         <button
           onClick={startMic}
-          className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl transition-all ${
+          className={`w-14 h-14 rounded-full text-2xl flex items-center justify-center ${
             isListening
-              ? "bg-red-500 animate-pulse shadow-lg shadow-red-500/40"
+              ? "bg-red-500 animate-pulse"
               : "bg-indigo-600 hover:bg-indigo-500"
           }`}
         >
@@ -167,12 +206,12 @@ const StoryChatbot = ({ storyId }) => {
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
           placeholder="Type or speak..."
-          className="flex-1 bg-white/10 backdrop-blur px-4 py-3 rounded-full text-sm outline-none placeholder:text-white/50"
+          className="flex-1 bg-white/10 px-4 py-3 rounded-full outline-none text-sm"
         />
 
         <button
           onClick={() => handleSend()}
-          className="px-4 py-2 rounded-full bg-indigo-600 hover:bg-indigo-500 transition"
+          className="px-4 py-2 rounded-full bg-indigo-600"
         >
           ➤
         </button>
