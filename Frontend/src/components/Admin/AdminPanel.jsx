@@ -19,7 +19,7 @@ const Avatar = ({ src, name, size = "h-10 w-10" }) => {
   const [imgError, setImgError] = useState(false);
   const initials = name 
     ? name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2) 
-    : "??"
+    : "A"
 
   return (
     <div className={`${size} rounded-full overflow-hidden border border-slate-700 shadow-inner flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 flex-shrink-0 relative`}>
@@ -71,7 +71,7 @@ const StatCard = ({ label, value, icon: Icon, colorClass }) => (
 export default function AdminPanel() {
   const navigate = useNavigate();
   const token = localStorage.getItem("accessToken");
-  const user = JSON.parse(localStorage.getItem("user"));
+  const adminProfile = JSON.parse(localStorage.getItem("user"));
 
   const [userSummary, setUserSummary] = useState([]); 
   const [feedbacks, setFeedbacks] = useState([]);
@@ -83,7 +83,7 @@ export default function AdminPanel() {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (!token || user?.role !== "admin") {
+    if (!token || adminProfile?.role !== "admin") {
       navigate("/login");
       return;
     }
@@ -190,9 +190,9 @@ export default function AdminPanel() {
 
         <div className="mt-auto pt-6 border-t border-slate-900/80">
            <div className="flex items-center gap-3 mb-6 bg-slate-900/40 p-3 rounded-2xl border border-slate-800">
-             <Avatar src={user?.avatar} name={user?.fullName} size="h-9 w-9" />
+             <Avatar src={adminProfile?.avatar} name={adminProfile?.fullName} size="h-9 w-9" />
              <div className="overflow-hidden">
-               <p className="text-[11px] font-black text-white uppercase truncate">{user?.fullName}</p>
+               <p className="text-[11px] font-black text-white uppercase truncate">{adminProfile?.fullName}</p>
                <p className="text-[9px] text-slate-500 font-bold uppercase tracking-tighter">Root Admin</p>
              </div>
            </div>
@@ -208,7 +208,6 @@ export default function AdminPanel() {
 
         <AnimatePresence mode="wait">
           
-          {/* 1. DASHBOARD */}
           {tab === "dashboard" && (
             <motion.div key="dash" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="space-y-8">
               <header>
@@ -216,44 +215,13 @@ export default function AdminPanel() {
                 <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Live Platform Metrics</p>
               </header>
 
-              {/* QUICK STATS HUD */}
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <StatCard 
-                  label="Total Users" 
-                  value={userSummary.length} 
-                  icon={FaUser } 
-                  colorClass="bg-indigo-500/20" 
-                />
-                <StatCard 
-                  label="Banned" 
-                  value={userSummary.filter(u => u.userDetails?.isBanned || u.isBanned).length} 
-                  icon={ShieldAlert} 
-                  colorClass="bg-rose-500/20" 
-                />
-                <StatCard 
-                  label="Active Units" 
-                  value={userSummary.filter(u => !(u.userDetails?.isBanned || u.isBanned)).length} 
-                  icon={Activity} 
-                  colorClass="bg-emerald-500/20" 
-                />
-                <StatCard 
-                  label="Feedback" 
-                  value={feedbacks.length} 
-                  icon={MessageSquare} 
-                  colorClass="bg-blue-500/20" 
-                />
-                <StatCard 
-                  label="Pending" 
-                  value={feedbacks.filter(f => !f.adminResponse).length} 
-                  icon={Zap} 
-                  colorClass="bg-amber-500/20" 
-                />
-                <StatCard 
-                  label="Stories" 
-                  value={stories.length} 
-                  icon={Globe} 
-                  colorClass="bg-purple-500/20" 
-                />
+                <StatCard label="Total Users" value={userSummary.length} icon={FaUser} colorClass="bg-indigo-500/20" />
+                <StatCard label="Banned" value={userSummary.filter(u => u.userDetails?.isBanned || u.isBanned).length} icon={ShieldAlert} colorClass="bg-rose-500/20" />
+                <StatCard label="Active Units" value={userSummary.filter(u => !(u.userDetails?.isBanned || u.isBanned)).length} icon={Activity} colorClass="bg-emerald-500/20" />
+                <StatCard label="Feedback" value={feedbacks.length} icon={MessageSquare} colorClass="bg-blue-500/20" />
+                <StatCard label="Pending" value={feedbacks.filter(f => !f.response).length} icon={Zap} colorClass="bg-amber-500/20" />
+                <StatCard label="Stories" value={stories.length} icon={Globe} colorClass="bg-purple-500/20" />
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -269,7 +237,6 @@ export default function AdminPanel() {
                     </ResponsiveContainer>
                   </div>
                 </GlassCard>
-                
                 <GlassCard title="Recent Transmissions" icon={Globe} className="lg:col-span-2">
                   <div className="space-y-3">
                     {stories.slice(0, 5).map(s => (
@@ -290,22 +257,15 @@ export default function AdminPanel() {
             </motion.div>
           )}
 
-          {/* 2. USER MANAGEMENT */}
           {tab === "users" && (
             <motion.div key="users" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} className="max-w-5xl mx-auto">
               <div className="flex justify-between items-center mb-8">
                   <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Registry Management</h2>
                   <div className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
-                    <input 
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Filter by Name/ID..." 
-                        className="bg-slate-900/60 border border-slate-800 rounded-2xl py-3 pl-12 pr-6 text-xs text-white focus:border-indigo-500 outline-none w-72 transition-all"
-                    />
+                    <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Filter by Name/ID..." className="bg-slate-900/60 border border-slate-800 rounded-2xl py-3 pl-12 pr-6 text-xs text-white focus:border-indigo-500 outline-none w-72 transition-all" />
                   </div>
               </div>
-
               <GlassCard title="Active User Nodes" icon={Users}>
                 <div className="space-y-3">
                   {filteredUsers.map(u => {
@@ -316,29 +276,18 @@ export default function AdminPanel() {
                         <div className="flex items-center gap-4">
                           <Avatar src={u.userDetails?.avatar || u.avatar} name={u.userDetails?.fullName || u.fullName} />
                           <div>
-                            <p className="text-sm font-bold text-white uppercase">{u.userDetails?.fullName || u.fullName || "Journey Ai"}</p>
+                            <p className="text-sm font-bold text-white uppercase">{u.userDetails?.fullName || u.fullName || "User"}</p>
                             <p className="text-[10px] text-slate-500 font-mono italic">{u.userDetails?.email || u.email}</p>
                           </div>
                         </div>
-                        
                         <div className="flex items-center gap-4">
                           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase flex items-center gap-2 ${isBanned ? 'bg-rose-500/10 text-rose-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                               <div className={`w-1 h-1 rounded-full ${isBanned ? 'bg-rose-500' : 'bg-emerald-500'} animate-pulse`} />
                               {isBanned ? 'Restricted' : 'Operational'}
                           </div>
-                          
-                          <div className="flex gap-2">
-                             <button 
-                                onClick={() => handleToggleBan(userId, isBanned)}
-                                className={`p-2 rounded-lg transition-all border ${isBanned ? 'border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white' : 'border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white'}`}
-                                title={isBanned ? "Lift Ban" : "Ban User"}
-                             >
-                                {isBanned ? <ShieldCheck size={16} /> : <ShieldAlert size={16} />}
-                             </button>
-                             <button className="p-2 rounded-lg border border-slate-800 text-slate-500 hover:bg-slate-800 transition-all">
-                                <ChevronRight size={16} />
-                             </button>
-                          </div>
+                          <button onClick={() => handleToggleBan(userId, isBanned)} className={`p-2 rounded-lg transition-all border ${isBanned ? 'border-emerald-500/20 text-emerald-500 hover:bg-emerald-500 hover:text-white' : 'border-rose-500/20 text-rose-500 hover:bg-rose-500 hover:text-white'}`}>
+                            {isBanned ? <ShieldCheck size={16} /> : <ShieldAlert size={16} />}
+                          </button>
                         </div>
                       </div>
                     );
@@ -348,87 +297,75 @@ export default function AdminPanel() {
             </motion.div>
           )}
 
-          {/* 3. STORY ANALYTICS */}
-          {tab === "analytics" && (
-            <motion.div key="analytics" initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} className="max-w-4xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Story Analytics</h2>
-                </div>
-
-                <div className="grid grid-cols-1 gap-4">
-                  {filteredUsers.sort((a,b) => b.totalStories - a.totalStories).map((u) => (
-                    <motion.div 
-                        whileHover={{ y: -5 }}
-                        key={u._id || u.userDetails?._id} 
-                        className="p-6 bg-slate-900/40 border border-slate-800 rounded-[32px] flex items-center justify-between group"
-                    >
-                      <div className="flex items-center gap-6">
-                        <Avatar src={u.userDetails?.avatar || u.avatar} name={u.userDetails?.fullName || u.fullName} size="h-14 w-14" />
-                        <div>
-                          <p className="text-lg font-black text-white uppercase group-hover:text-indigo-400 transition-colors">
-                            {u.userDetails?.fullName || u.fullName || "Anonymous"}
-                          </p>
-                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">Creator Hub Activity</p>
-                        </div>
-                      </div>
-                      <div className="bg-slate-950 px-8 py-4 rounded-[24px] border border-slate-800 text-center min-w-[120px]">
-                        <p className="text-3xl font-black text-indigo-500 leading-none">{u.totalStories}</p>
-                        <p className="text-[9px] text-slate-500 font-black uppercase mt-2 tracking-widest">Stories</p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-            </motion.div>
-          )}
-
-          {/* 4. FEEDBACKS */}
           {tab === "feedback" && (
             <motion.div key="fb" initial={{opacity:0, y:20}} animate={{opacity:1, y:0}} className="max-w-3xl mx-auto space-y-6">
               <header className="mb-10">
                 <h2 className="text-3xl font-black text-white uppercase italic">Feedback Inbox</h2>
               </header>
+              {feedbacks.map(f => {
+                // FIXED: Using 'f.user' instead of 'f.userId' to match your backend
+                const feedbackUser = f.user || {}; 
+                const displayName = feedbackUser.fullName || "Anonymous User";
+                const displayAvatar = feedbackUser.avatar || null;
 
-              {feedbacks.map(f => (
-                <div key={f._id} className="p-8 bg-slate-900/40 border border-slate-800 rounded-[32px] hover:border-indigo-500/20 transition-all">
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-3">
-                        <Avatar name={f.userId?.fullName} size="h-10 w-10" />
-                        <div>
-                            <p className="text-xs font-bold text-white uppercase">{f.userId?.fullName || "Guest"}</p>
-                            <p className="text-[9px] text-slate-500 font-mono">{new Date(f.createdAt).toLocaleString()}</p>
+                return (
+                  <div key={f._id} className="p-8 bg-slate-900/40 border border-slate-800 rounded-[32px] hover:border-indigo-500/20 transition-all">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center gap-3">
+                          <Avatar src={displayAvatar} name={displayName} size="h-10 w-10" />
+                          <div>
+                              <p className="text-xs font-bold text-white uppercase">{displayName}</p>
+                              <p className="text-[9px] text-slate-500 font-mono">{new Date(f.createdAt).toLocaleString()}</p>
+                          </div>
+                      </div>
+                      {/* FIXED: Using 'f.response' to match backend schema */}
+                      {!f.response && <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />}
+                    </div>
+                    <p className="text-slate-300 text-sm italic leading-relaxed mb-6">"{f.comment}"</p>
+                    
+                    {f.response ? (
+                      <div className="p-5 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl">
+                          <p className="text-[9px] font-black text-indigo-400 uppercase mb-2">System Response</p>
+                          <p className="text-xs text-indigo-300 italic">{f.response}</p>
+                      </div>
+                    ) : activeReplyId === f._id ? (
+                      <div className="space-y-4">
+                        <textarea autoFocus className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-5 text-sm text-white focus:border-indigo-500 outline-none h-28" placeholder="Type response..." value={replyText} onChange={(e) => setReplyText(e.target.value)} />
+                        <div className="flex gap-2">
+                          <button onClick={() => handleSendReply(f._id)} className="bg-indigo-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase text-white">Send</button>
+                          <button onClick={() => setActiveReplyId(null)} className="bg-slate-800 px-8 py-3 rounded-xl text-[10px] font-black uppercase text-slate-400">Abort</button>
                         </div>
-                    </div>
-                    {!f.adminResponse && <div className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />}
+                      </div>
+                    ) : (
+                      <button onClick={() => setActiveReplyId(f._id)} className="bg-indigo-600/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all flex items-center gap-2">
+                        <Send size={14} /> Respond to User
+                      </button>
+                    )}
                   </div>
-                  
-                  <p className="text-slate-300 text-sm italic leading-relaxed mb-6">"{f.comment}"</p>
-                  
-                  {f.adminResponse ? (
-                    <div className="p-5 bg-indigo-500/5 border border-indigo-500/20 rounded-2xl">
-                        <p className="text-[9px] font-black text-indigo-400 uppercase mb-2">System Response</p>
-                        <p className="text-xs text-indigo-300 italic">{f.adminResponse}</p>
-                    </div>
-                  ) : activeReplyId === f._id ? (
-                    <div className="space-y-4">
-                      <textarea 
-                        autoFocus
-                        className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-5 text-sm text-white focus:border-indigo-500 outline-none h-28 transition-all"
-                        placeholder="Type response transmission..."
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                      />
-                      <div className="flex gap-2">
-                        <button onClick={() => handleSendReply(f._id)} className="bg-indigo-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase text-white hover:bg-indigo-500 transition-all">Send</button>
-                        <button onClick={() => setActiveReplyId(null)} className="bg-slate-800 px-8 py-3 rounded-xl text-[10px] font-black uppercase text-slate-400">Abort</button>
+                );
+              })}
+            </motion.div>
+          )}
+
+          {tab === "analytics" && (
+            <motion.div key="analytics" initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} className="max-w-4xl mx-auto">
+                <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter mb-8">Story Analytics</h2>
+                <div className="grid grid-cols-1 gap-4">
+                  {filteredUsers.sort((a,b) => b.totalStories - a.totalStories).map((u) => (
+                    <div key={u._id || u.userDetails?._id} className="p-6 bg-slate-900/40 border border-slate-800 rounded-[32px] flex items-center justify-between">
+                      <div className="flex items-center gap-6">
+                        <Avatar src={u.userDetails?.avatar || u.avatar} name={u.userDetails?.fullName || u.fullName} size="h-14 w-14" />
+                        <div>
+                          <p className="text-lg font-black text-white uppercase">{u.userDetails?.fullName || u.fullName || "Creator"}</p>
+                        </div>
+                      </div>
+                      <div className="bg-slate-950 px-8 py-4 rounded-[24px] border border-slate-800 text-center">
+                        <p className="text-3xl font-black text-indigo-500">{u.totalStories}</p>
+                        <p className="text-[9px] text-slate-500 font-black uppercase">Stories</p>
                       </div>
                     </div>
-                  ) : (
-                    <button onClick={() => setActiveReplyId(f._id)} className="bg-indigo-600/10 px-6 py-3 rounded-xl text-[10px] font-black uppercase text-indigo-400 hover:bg-indigo-600 hover:text-white transition-all flex items-center gap-2">
-                      <Send size={14} /> Respond to User
-                    </button>
-                  )}
+                  ))}
                 </div>
-              ))}
             </motion.div>
           )}
 

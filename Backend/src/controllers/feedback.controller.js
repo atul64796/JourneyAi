@@ -36,7 +36,7 @@ export const createFeedback = asyncHandler(async (req, res) => {
 ========================= */
 export const getMyFeedback = asyncHandler(async (req, res) => {
   const feedbacks = await Feedback.find({ user: req.user._id })
-    .populate("storyId", "destination mood")
+    .populate("storyId", "destination mood","fullName avatar")
     .sort({ createdAt: -1 });
 
   return res
@@ -126,9 +126,12 @@ export const getSomeFeedbacktoUser = asyncHandler(async (req, res) => {
 /* =========================
    GET ALL FEEDBACKS (ADMIN)
 ========================= */
+
+
 export const getAllFeedback = asyncHandler(async (req, res) => {
   const feedbacks = await Feedback.find()
-    .populate("user", "email")
+    // CHANGE THIS LINE: Add fullName and avatar
+    .populate("user", "fullName avatar email") 
     .populate("storyId", "destination")
     .sort({ createdAt: -1 });
 
