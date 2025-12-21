@@ -2,7 +2,7 @@
   "name": "aitravelstorygenerator",
   "version": "1.0.0",
   "description": "",
-  "license": "ISC",
+  "license": "MIT",
   "author": "debjit atul sankha chandryee",
   "type": "module",
   "main": "index.js",
@@ -10,6 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon -r dotenv/config  --experimental-json-modules index.js"
   },
+  
   "dependencies": {
     "@google-cloud/text-to-speech": "^6.4.0",
     "@google/genai": "^1.33.0",
@@ -29,4 +30,5 @@
     "path": "^0.12.7",
     "uuid": "^13.0.0"
   }
+  
 }
