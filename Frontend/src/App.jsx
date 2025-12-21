@@ -18,18 +18,20 @@ import History from "./components/History";
 import StoryView from "./components/StoryView";
 
 /* -----------------------------
-   Layout Wrapper
+    Layout Wrapper
 -------------------------------- */
 function Layout({ children }) {
   const location = useLocation();
 
-  // Hide navbar on admin routes
-  const hideNavbar = location.pathname.startsWith("/admin");
+  // Hide navbar on admin routes OR cinematic story view
+  const hideNavbar =
+    location.pathname.startsWith("/admin") ||
+    location.pathname.startsWith("/story/");
 
   return (
     <>
       {!hideNavbar && <Navbar />}
-      {children}
+      <main>{children}</main>
     </>
   );
 }
@@ -39,14 +41,20 @@ function App() {
     <Router>
       <Layout>
         <Routes>
-          {/* Public routes */}
+          {/* ================= PUBLIC ROUTES ================= */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/features" element={<Features />} />
-          
 
-          {/* User protected routes */}
+          {/* ================= PUBLIC STORY ROUTES ================= */}
+          {/* Public story listing */}
+          <Route path="/getpublicStories" element={<Stories />} />
+
+          {/* Story view (PUBLIC + PRIVATE handled by backend) */}
+          <Route path="/stories/:id" element={<StoryView />} />
+
+          {/* ================= USER PROTECTED ROUTES ================= */}
           <Route
             path="/user/generateStories"
             element={
@@ -55,11 +63,12 @@ function App() {
               </ProtectedRoute>
             }
           />
+
           <Route
             path="/history"
             element={
               <ProtectedRoute>
-                <History/>
+                <History />
               </ProtectedRoute>
             }
           />
@@ -81,24 +90,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/getpublicStories"
-            element={
-              <ProtectedRoute>
-                <Stories />
-              </ProtectedRoute>
-            }
-          />
-
-          
-<Route
-  path="/stories/:id"
-  element={
-    <ProtectedRoute>
-      <StoryView />
-    </ProtectedRoute>
-  }
-/>
 
           <Route
             path="/changePassword"
@@ -109,13 +100,23 @@ function App() {
             }
           />
 
-          {/* Admin protected routes */}
+          {/* ================= ADMIN ROUTES ================= */}
           <Route
             path="/admin/dashboard"
             element={
               <AdminRoute>
                 <AdminPanel />
               </AdminRoute>
+            }
+          />
+
+          {/* ================= 404 ================= */}
+          <Route
+            path="*"
+            element={
+              <div className="min-h-screen bg-[#05070a] flex items-center justify-center text-white font-black uppercase tracking-widest">
+                404 | Neural Link Severed
+              </div>
             }
           />
         </Routes>

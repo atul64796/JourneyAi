@@ -1,115 +1,92 @@
 import express from "express";
 import {
-  createStoryServices,
-  regenerateStoryService,
-  toggleStoryVisibilityService,
-} from "../Service/Story.service.js";
+  createStory,
+  getPublicStories,
+  getStoryById,
+  regenerateStory,
+  toggleStoryVisibility,
+  getUserStoryStats,
+  getAllStoriesForAdmin,
+  getUserStorySummaryForAdmin, // <-- Added this import
+} from "../controllers/story.controller.js";
 
-import { getPublicStories ,getStoryById} from "../controllers/story.controller.js";
 import { verifyJwt } from "../middlewares/authmiddleware.js";
+import { optionalAuth } from "../middlewares/optionalAuth.middleware.js";
+import { adminOnly } from "../middlewares/adminOnly.middleware.js";
 import History from "../models/historySchema.js";
 
 const router = express.Router();
 
-/* ---------------- PUBLIC STORIES ---------------- */
+/* ================= PUBLIC ROUTES ================= */
+
+/* -------- PUBLIC STORIES -------- */
 router.get("/public", getPublicStories);
 
-/* ---------------- CREATE STORY ---------------- */
-router.post("/", verifyJwt, async (req, res) => {
-  try {
-    const story = await createStoryServices({
-      userId: req.user._id,
-      destination: req.body.destination,
-      duration: req.body.duration,
-      mood: req.body.mood,
-      language: req.body.language,
-      templateStyle: req.body.templateStyle,
-      isPublic: req.body.isPublic,
-    });
+/* ================= USER ROUTES ================= */
 
-    // 🔥 CREATE HISTORY
+/* -------- USER STORY STATS -------- */
+router.get("/stats", verifyJwt, getUserStoryStats);
+
+/* -------- CREATE STORY -------- */
+router.post("/", verifyJwt, async (req, res, next) => {
+  try {
+    await createStory(req, res);
+
     await History.create({
       userId: req.user._id,
-      storyId: story._id,
       action: "create",
     });
-
-    res.status(201).json({
-      success: true,
-      message: "Story created successfully",
-      data: story,
-    });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
+    next(err);
   }
 });
 
-/* ---------------- REGENERATE STORY ---------------- */
-router.post("/:storyId/regenerate", verifyJwt, async (req, res) => {
+/* -------- REGENERATE STORY -------- */
+router.post("/:storyId/regenerate", verifyJwt, async (req, res, next) => {
   try {
-    const story = await regenerateStoryService(req.params.storyId);
+    await regenerateStory(req, res);
 
-    // 🔥 CREATE HISTORY
     await History.create({
       userId: req.user._id,
-      storyId: story._id,
+      storyId: req.params.storyId,
       action: "regenerate",
-      regenerateCount: story.regenerateCount,
-    });
-
-    res.status(200).json({
-      success: true,
-      message: "Story regenerated successfully",
-      data: story,
     });
   } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message,
-    });
+    next(err);
   }
 });
 
-/* ---------------- TOGGLE VISIBILITY ---------------- */
-router.patch("/:storyId/visibility", verifyJwt, async (req, res) => {
+/* -------- TOGGLE VISIBILITY -------- */
+router.patch("/:storyId/visibility", verifyJwt, async (req, res, next) => {
   try {
-    const { isPublic } = req.body;
+    await toggleStoryVisibility(req, res);
 
-    if (typeof isPublic !== "boolean") {
-      return res.status(400).json({
-        success: false,
-        message: "isPublic must be boolean",
-      });
-    }
-
-    const story = await toggleStoryVisibilityService(
-      req.params.storyId,
-      isPublic
-    );
-
-    // 🔥 OPTIONAL HISTORY (keep or remove)
     await History.create({
       userId: req.user._id,
-      storyId: story._id,
+      storyId: req.params.storyId,
       action: "visibility_change",
     });
-
-    res.status(200).json({
-      success: true,
-      message: "Story visibility updated",
-      data: story,
-    });
   } catch (err) {
-    res.status(404).json({
-      success: false,
-      message: err.message,
-    });
+    next(err);
   }
 });
-//get your story id
-router.get("/:id", verifyJwt, getStoryById);
+
+/* -------- GET STORY BY ID -------- */
+router.get("/:id", optionalAuth, getStoryById);
+
+/* ================= ADMIN ROUTES ================= */
+
+
+/* -------- ADMIN: ALL STORIES -------- */
+router.get(
+  "/admin/all",
+  verifyJwt,
+  adminOnly,
+  getAllStoriesForAdmin
+);
+
+/* -------- ADMIN: USER ACTIVITY SUMMARY -------- */
+
+router.get("/admin/user-summary",verifyJwt,adminOnly,getUserStorySummaryForAdmin);
 
 export default router;
