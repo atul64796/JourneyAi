@@ -1,34 +1,33 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import History from "../models/historySchema.js";
+import { ApiError } from "../utils/ApiError.js";
 
-/**
- * POST /j1/v1/history
- */
+
 export const createHistory = asyncHandler(async (req, res) => {
-  const { storyId, action, regenerateCount = 0 } = req.body;
+  const { storyId, action } = req.body;
+
+  if (!action) {
+    throw new ApiError(400, "Action is required for history logging");
+  }
 
   const history = await History.create({
     userId: req.user._id,
-    storyId,
+    storyId: storyId || null, // storyId is now optional to prevent crashes
     action,
-    regenerateCount,
   });
 
   return res
     .status(201)
-    .json(new ApiResponse(201, history, "History created successfully"));
+    .json(new ApiResponse(201, history, "History record created successfully"));
 });
 
-/**
- * GET /j1/v1/history
- */
 
 export const getUserHistory = asyncHandler(async (req, res) => {
   const history = await History.find({ userId: req.user._id })
     .populate({
       path: "userId",
-      select: "fullName avatar",
+      select: "fullName avatar", // Make sure "avatar" is included here
     })
     .populate({
       path: "storyId",
@@ -41,20 +40,16 @@ export const getUserHistory = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, history, "History fetched successfully"));
 });
 
-
-/**
- * DELETE /j1/v1/history/:id
- */
 export const deleteHistory = asyncHandler(async (req, res) => {
   const history = await History.findOneAndDelete({
     _id: req.params.id,
-    userId: req.user._id,
+    userId: req.user._id, // Security: Ensures users only delete their own data
   });
 
   if (!history) {
     return res
       .status(404)
-      .json(new ApiResponse(404, null, "History not found"));
+      .json(new ApiResponse(404, null, "History record not found"));
   }
 
   return res

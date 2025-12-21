@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/AsyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import Story from "../models/Story.schema.js";
+import History from "../models/historySchema.js"; 
 import {
   createStoryServices,
   regenerateStoryService,
@@ -23,7 +24,16 @@ export const createStory = asyncHandler(async (req, res) => {
     isPublic: req.body.isPublic,
   });
 
-  res
+  // LOG HISTORY: Successfully created story
+  if (story?._id) {
+    await History.create({
+      userId: req.user._id,
+      storyId: story._id,
+      action: "create",
+    });
+  }
+
+  return res
     .status(201)
     .json(new ApiResponse(201, story, "Story created successfully"));
 });
@@ -41,11 +51,12 @@ export const getPublicStories = asyncHandler(async (req, res) => {
     .limit(limit)
     .select("-__v");
 
-  res
+  return res
     .status(200)
     .json(new ApiResponse(200, stories, "Public stories fetched"));
 });
 
+/* ---------------- GET STORY BY ID ---------------- */
 export const getStoryById = asyncHandler(async (req, res) => {
   const story = await Story.findById(req.params.id)
     .populate("userId", "fullName avatar");
@@ -56,21 +67,21 @@ export const getStoryById = asyncHandler(async (req, res) => {
       .json(new ApiResponse(404, null, "Story not found"));
   }
 
-  // ✅ Public story → allow everyone
+  // Allow public access
   if (story.isPublic) {
     return res
       .status(200)
       .json(new ApiResponse(200, story, "Story fetched"));
   }
 
-  // ❌ Private + not logged in
+  // Check auth for private stories
   if (!req.user) {
     return res
       .status(401)
       .json(new ApiResponse(401, null, "Login required"));
   }
 
-  // ❌ Private + not owner + not admin
+  // Ownership or Admin check
   if (
     story.userId._id.toString() !== req.user._id.toString() &&
     req.user.role !== "admin"
@@ -80,8 +91,7 @@ export const getStoryById = asyncHandler(async (req, res) => {
       .json(new ApiResponse(403, null, "Access denied"));
   }
 
-  // ✅ Owner or admin
-  res
+  return res
     .status(200)
     .json(new ApiResponse(200, story, "Story fetched"));
 });
@@ -90,7 +100,16 @@ export const getStoryById = asyncHandler(async (req, res) => {
 export const regenerateStory = asyncHandler(async (req, res) => {
   const story = await regenerateStoryService(req.params.storyId);
 
-  res
+  // LOG HISTORY: Successfully regenerated story
+  if (story?._id) {
+    await History.create({
+      userId: req.user._id,
+      storyId: story._id,
+      action: "regenerate",
+    });
+  }
+
+  return res
     .status(200)
     .json(new ApiResponse(200, story, "Story regenerated successfully"));
 });
@@ -110,7 +129,16 @@ export const toggleStoryVisibility = asyncHandler(async (req, res) => {
     isPublic
   );
 
-  res
+  // LOG HISTORY: Changed visibility
+  if (story?._id) {
+    await History.create({
+      userId: req.user._id,
+      storyId: story._id,
+      action: "visibility_change",
+    });
+  }
+
+  return res
     .status(200)
     .json(new ApiResponse(200, story, "Story visibility updated"));
 });
@@ -131,7 +159,7 @@ export const getUserStoryStats = asyncHandler(async (req, res) => {
     },
   ]);
 
-  res.status(200).json(
+  return res.status(200).json(
     new ApiResponse(
       200,
       stats[0] || {
@@ -148,7 +176,6 @@ export const getUserStoryStats = asyncHandler(async (req, res) => {
    ADMIN CONTROLLERS
 ========================================================= */
 
-/* ---------------- ADMIN: GET ALL STORIES ---------------- */
 export const getAllStoriesForAdmin = asyncHandler(async (req, res) => {
   const stories = await Story.find()
     .populate("userId", "email fullName avatar")
@@ -157,12 +184,11 @@ export const getAllStoriesForAdmin = asyncHandler(async (req, res) => {
       "destination duration mood language isPublic regenerateCount createdAt userId"
     );
 
-  res.status(200).json(
+  return res.status(200).json(
     new ApiResponse(200, stories, "All stories fetched for admin")
   );
 });
 
-/* ---------------- ADMIN: GET STORIES BY USER ---------------- */
 export const getStoriesByUserForAdmin = asyncHandler(async (req, res) => {
   const { userId } = req.params;
 
@@ -170,14 +196,10 @@ export const getStoriesByUserForAdmin = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 })
     .select("destination isPublic regenerateCount createdAt");
 
-  res.status(200).json(
+  return res.status(200).json(
     new ApiResponse(200, stories, "User stories fetched for admin")
   );
 });
-
-/* =========================================================
-   ADMIN: USER STORY SUMMARY (UNCHANGED, WORKING)
-========================================================= */
 
 export const getUserStorySummaryForAdmin = asyncHandler(async (req, res) => {
   const summary = await Story.aggregate([
@@ -219,7 +241,7 @@ export const getUserStorySummaryForAdmin = asyncHandler(async (req, res) => {
     { $sort: { totalStories: -1 } },
   ]);
 
-  res.status(200).json(
+  return res.status(200).json(
     new ApiResponse(200, summary, "User activity summary fetched successfully")
   );
 });

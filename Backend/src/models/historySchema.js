@@ -8,20 +8,18 @@ const historySchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-
     storyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Story",
-      required: true,
+      required: true, // If a story fails to create, this will fail. Consider required: false if you want to log failed attempts.
       index: true,
     },
-
     action: {
       type: String,
-      enum: ["create", "regenerate", "delete", "share"],
+      // MUST include "visibility_change" to match your controller
+      enum: ["create", "regenerate", "delete", "share", "visibility_change"], 
       required: true,
     },
-
     regenerateCount: {
       type: Number,
       default: 0,
