@@ -1,21 +1,21 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 
-import Login from "./components/Login/Login";
-import Register from "./components/Signup/Register";
-import Home from "./components/Home";
-import Navbar from "./components/Navbar";
-import Profile from "./components/Profile/Profile";
+import Login from "./components/Pages/Login/Login";
+import Register from "./components/Pages/Signup/Register";
+import Home from "./components/Pages/LandingPage/Home";
+import Navbar from "./components/Pages/Navbar";
+import Profile from "./components/Pages/Profile/Profile";
 import AdminPanel from "./components/Admin/AdminPanel";
-import Dashboard from "./components/Dashboard/Dashboard";
-import UpdateAccount from "./components/update-Account/UpdateAccount";
-import ChangePassword from "./components/update-Account/ChangePassword";
-import ProtectedRoute from "./components/ProtectRoute";
-import AdminRoute from "./components/ProtectRoute/AdminRoute";
-import Stories from "./components/Stories";
-import Features from "./components/Features";
-import History from "./components/History";
-import StoryView from "./components/StoryView";
+import Dashboard from "./components/Pages/Dashboard/Dashboard";
+import UpdateAccount from "./components/pages/update-Account/UpdateAccount";
+import ChangePassword from "./components/Pages/update-Account/ChangePassword";
+import ProtectedRoute from "./components/pages/ProtectRoute/index";
+import AdminRoute from "./components/pages/ProtectRoute/AdminRoute";
+import Stories from "./components/Pages/Story/Stories";
+import Features from "./components/Pages/LandingPage/Features";
+import History from "./components/Pages/History/History";
+import StoryView from "./components/Pages/Story/StoryView";
 
 /* -----------------------------
     Layout Wrapper

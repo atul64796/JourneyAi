@@ -12,6 +12,8 @@ import {
   BarChart3, Globe, LogOut, Search, ChevronRight, ShieldCheck
 } from "lucide-react";
 
+import { FaUser } from "react-icons/fa";
+
 /* ===================== HELPER: ROBUST AVATAR ===================== */
 const Avatar = ({ src, name, size = "h-10 w-10" }) => {
   const [imgError, setImgError] = useState(false);
@@ -219,38 +221,38 @@ export default function AdminPanel() {
                 <StatCard 
                   label="Total Users" 
                   value={userSummary.length} 
-                  icon={Users} 
-                  colorClass="bg-indigo-500" 
+                  icon={FaUser } 
+                  colorClass="bg-indigo-500/20" 
                 />
                 <StatCard 
                   label="Banned" 
                   value={userSummary.filter(u => u.userDetails?.isBanned || u.isBanned).length} 
                   icon={ShieldAlert} 
-                  colorClass="bg-rose-500" 
+                  colorClass="bg-rose-500/20" 
                 />
                 <StatCard 
                   label="Active Units" 
                   value={userSummary.filter(u => !(u.userDetails?.isBanned || u.isBanned)).length} 
                   icon={Activity} 
-                  colorClass="bg-emerald-500" 
+                  colorClass="bg-emerald-500/20" 
                 />
                 <StatCard 
                   label="Feedback" 
                   value={feedbacks.length} 
                   icon={MessageSquare} 
-                  colorClass="bg-blue-500" 
+                  colorClass="bg-blue-500/20" 
                 />
                 <StatCard 
                   label="Pending" 
                   value={feedbacks.filter(f => !f.adminResponse).length} 
                   icon={Zap} 
-                  colorClass="bg-amber-500" 
+                  colorClass="bg-amber-500/20" 
                 />
                 <StatCard 
                   label="Stories" 
                   value={stories.length} 
                   icon={Globe} 
-                  colorClass="bg-purple-500" 
+                  colorClass="bg-purple-500/20" 
                 />
               </div>
 
