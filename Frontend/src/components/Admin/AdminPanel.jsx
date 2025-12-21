@@ -53,6 +53,18 @@ const GlassCard = ({ title, icon: Icon, children, className = "" }) => (
   </motion.div>
 );
 
+const StatCard = ({ label, value, icon: Icon, colorClass }) => (
+  <div className="bg-slate-900/40 border border-slate-800/60 p-5 rounded-[24px] flex flex-col gap-3">
+    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${colorClass} bg-opacity-10`}>
+      <Icon size={16} className={colorClass.replace('bg-', 'text-')} />
+    </div>
+    <div>
+      <p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{label}</p>
+      <p className="text-xl font-black text-white italic tracking-tighter">{value}</p>
+    </div>
+  </div>
+);
+
 /* ===================== MAIN COMPONENT ===================== */
 export default function AdminPanel() {
   const navigate = useNavigate();
@@ -94,7 +106,6 @@ export default function AdminPanel() {
     }
   };
 
-  /* --- NEW ACTION HANDLERS --- */
   const handleToggleBan = async (userId, isBanned) => {
     const action = isBanned ? "Unban" : "Ban";
     const result = await Swal.fire({
@@ -153,7 +164,7 @@ export default function AdminPanel() {
           <div className="bg-indigo-600 p-2 rounded-xl shadow-lg shadow-indigo-600/20">
             <ShieldAlert size={20} className="text-white" />
           </div>
-          <h2 className="text-lg font-black tracking-tighter text-white uppercase italic">Nexus <span className="text-indigo-500">OS</span></h2>
+          <h2 className="text-lg font-black tracking-tighter text-white uppercase italic">Journey <span className="text-indigo-500">AI</span></h2>
         </div>
 
         <nav className="space-y-1.5 flex-1">
@@ -162,7 +173,6 @@ export default function AdminPanel() {
             { id: "users", icon: Users, label: "User Management" },
             { id: "analytics", icon: BarChart3, label: "Story Analytics" },
             { id: "feedback", icon: MessageSquare, label: "Feedbacks" },
-            
           ].map((item) => (
             <button
               key={item.id}
@@ -204,6 +214,46 @@ export default function AdminPanel() {
                 <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Live Platform Metrics</p>
               </header>
 
+              {/* QUICK STATS HUD */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <StatCard 
+                  label="Total Users" 
+                  value={userSummary.length} 
+                  icon={Users} 
+                  colorClass="bg-indigo-500" 
+                />
+                <StatCard 
+                  label="Banned" 
+                  value={userSummary.filter(u => u.userDetails?.isBanned || u.isBanned).length} 
+                  icon={ShieldAlert} 
+                  colorClass="bg-rose-500" 
+                />
+                <StatCard 
+                  label="Active Units" 
+                  value={userSummary.filter(u => !(u.userDetails?.isBanned || u.isBanned)).length} 
+                  icon={Activity} 
+                  colorClass="bg-emerald-500" 
+                />
+                <StatCard 
+                  label="Feedback" 
+                  value={feedbacks.length} 
+                  icon={MessageSquare} 
+                  colorClass="bg-blue-500" 
+                />
+                <StatCard 
+                  label="Pending" 
+                  value={feedbacks.filter(f => !f.adminResponse).length} 
+                  icon={Zap} 
+                  colorClass="bg-amber-500" 
+                />
+                <StatCard 
+                  label="Stories" 
+                  value={stories.length} 
+                  icon={Globe} 
+                  colorClass="bg-purple-500" 
+                />
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <GlassCard title="Entity Distribution" icon={Activity}>
                   <div className="h-[240px]">
@@ -238,7 +288,7 @@ export default function AdminPanel() {
             </motion.div>
           )}
 
-          {/* 2. USER MANAGEMENT (UPDATED) */}
+          {/* 2. USER MANAGEMENT */}
           {tab === "users" && (
             <motion.div key="users" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} className="max-w-5xl mx-auto">
               <div className="flex justify-between items-center mb-8">
@@ -264,7 +314,7 @@ export default function AdminPanel() {
                         <div className="flex items-center gap-4">
                           <Avatar src={u.userDetails?.avatar || u.avatar} name={u.userDetails?.fullName || u.fullName} />
                           <div>
-                            <p className="text-sm font-bold text-white uppercase">{u.userDetails?.fullName || u.fullName || "Nexus Unit"}</p>
+                            <p className="text-sm font-bold text-white uppercase">{u.userDetails?.fullName || u.fullName || "Journey Ai"}</p>
                             <p className="text-[10px] text-slate-500 font-mono italic">{u.userDetails?.email || u.email}</p>
                           </div>
                         </div>
@@ -299,15 +349,15 @@ export default function AdminPanel() {
           {/* 3. STORY ANALYTICS */}
           {tab === "analytics" && (
             <motion.div key="analytics" initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} className="max-w-4xl mx-auto">
-               <div className="flex justify-between items-center mb-8">
-                 <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Story Analytics</h2>
-               </div>
+                <div className="flex justify-between items-center mb-8">
+                  <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Story Analytics</h2>
+                </div>
 
-               <div className="grid grid-cols-1 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   {filteredUsers.sort((a,b) => b.totalStories - a.totalStories).map((u) => (
                     <motion.div 
                         whileHover={{ y: -5 }}
-                        key={u._id} 
+                        key={u._id || u.userDetails?._id} 
                         className="p-6 bg-slate-900/40 border border-slate-800 rounded-[32px] flex items-center justify-between group"
                     >
                       <div className="flex items-center gap-6">
@@ -325,7 +375,7 @@ export default function AdminPanel() {
                       </div>
                     </motion.div>
                   ))}
-               </div>
+                </div>
             </motion.div>
           )}
 
@@ -379,8 +429,6 @@ export default function AdminPanel() {
               ))}
             </motion.div>
           )}
-
-       
 
         </AnimatePresence>
       </main>
