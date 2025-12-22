@@ -8,7 +8,8 @@ import "slick-carousel/slick/slick-theme.css";
 
 import { 
   MapPin, RefreshCw, Sparkles, 
-  Languages, Clock, Lock, Unlock, Compass, RotateCcw
+  Languages, Clock, Lock, Unlock, Compass, RotateCcw,
+  Share2, Check // Added Share and Check icons
 } from "lucide-react";
 
 import FeedbackSection from "../Feedback/FeedbackSection.jsx"; 
@@ -35,12 +36,42 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false); // New state for copy feedback
 
   useEffect(() => {
     if (story) {
       localStorage.setItem(STORY_STORAGE_KEY, JSON.stringify(story));
     }
   }, [story]);
+
+  /* ===================== SHARE LOGIC ===================== */
+  const handleShare = async () => {
+    if (!story) return;
+
+    const shareUrl = `${window.location.origin}/stories/${story._id}`;
+    const shareText = `Check out my AI-generated journey to ${story.destination}!\n\n"${story.storyText.substring(0, 100)}..."`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Voyage Scribe: ${story.destination}`,
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (err) {
+        console.error("Error sharing:", err);
+      }
+    } else {
+      // Fallback: Copy to Clipboard
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        setError("Could not copy link to clipboard.");
+      }
+    }
+  };
 
   const sliderSettings = {
     dots: true,
@@ -79,7 +110,6 @@ export default function Dashboard() {
     }
   };
 
-  // NEW: Handle Regeneration
   const handleRegenerate = async () => {
     if (!story?._id) return;
     setIsRegenerating(true);
@@ -127,7 +157,7 @@ export default function Dashboard() {
       {/* RIGHT PANEL */}
       <div className="w-full lg:w-[45%] h-[60vh] lg:h-full bg-[#0d0d0d] flex flex-col border-l border-white/5 relative shadow-2xl">
         
-        {/* Form */}
+        {/* Form Section */}
         <div className="p-6 lg:p-10 border-b border-white/5 bg-[#0d0d0d]/80 backdrop-blur-md z-30">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1">
@@ -210,6 +240,17 @@ export default function Dashboard() {
                   >
                     <RotateCcw size={14} className={isRegenerating ? "animate-spin" : ""} />
                     {isRegenerating ? "Rewriting..." : "Regenerate Tale"}
+                  </button>
+
+                  {/* SHARE BUTTON */}
+                  <button 
+                    onClick={handleShare}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 border ${
+                      copied ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-indigo-600/10 border-indigo-500/50 text-indigo-400 hover:bg-indigo-600 hover:text-white'
+                    }`}
+                  >
+                    {copied ? <Check size={14} /> : <Share2 size={14} />}
+                    {copied ? "Link Copied!" : "Share Story"}
                   </button>
                 </div>
                 

@@ -260,7 +260,7 @@ export default function AdminPanel() {
           {tab === "users" && (
             <motion.div key="users" initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} className="max-w-5xl mx-auto">
               <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">Registry Management</h2>
+                  <h2 className="text-3xl font-black text-white uppercase italic tracking-tighter">User Management</h2>
                   <div className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
                     <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Filter by Name/ID..." className="bg-slate-900/60 border border-slate-800 rounded-2xl py-3 pl-12 pr-6 text-xs text-white focus:border-indigo-500 outline-none w-72 transition-all" />

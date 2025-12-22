@@ -10,11 +10,11 @@ import {
   MessageSquare,
   X,
   Lock,
+  Share2, // Added Share icon
+  Check,
 } from "lucide-react";
 import api from "../../../services/api";
 import StoryChatbot from "./StoryChatbot";
-
-/* ===================== COMPONENT ===================== */
 
 const StoryView = () => {
   const { id } = useParams();
@@ -24,9 +24,9 @@ const StoryView = () => {
   const [loading, setLoading] = useState(true);
   const [showAI, setShowAI] = useState(false);
   const [forbidden, setForbidden] = useState(false);
+  const [copied, setCopied] = useState(false); // For clipboard feedback
 
   /* ===================== FETCH STORY ===================== */
-
   useEffect(() => {
     const fetchStory = async () => {
       try {
@@ -45,8 +45,29 @@ const StoryView = () => {
     fetchStory();
   }, [id]);
 
-  /* ===================== LOADING ===================== */
+  /* ===================== SHARE LOGIC ===================== */
+  const handleShare = async () => {
+    const shareData = {
+      title: `Journey to ${story.destination}`,
+      text: `Check out this travel story about ${story.destination}!`,
+      url: window.location.href,
+    };
 
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error("Error sharing:", err);
+    }
+  };
+
+  /* ===================== LOADING & ERROR STATES ===================== */
   if (loading) {
     return (
       <div className="flex flex-col justify-center items-center min-h-screen bg-[#050505]">
@@ -61,18 +82,12 @@ const StoryView = () => {
     );
   }
 
-  /* ===================== PRIVATE STORY BLOCK ===================== */
-
   if (forbidden) {
     return (
       <div className="min-h-screen bg-[#0a0c10] flex flex-col items-center justify-center text-center px-6">
         <Lock size={48} className="text-indigo-500 mb-6" />
-        <h2 className="text-2xl font-black text-white mb-2">
-          This story is private
-        </h2>
-        <p className="text-slate-500 max-w-md mb-8">
-          You don’t have permission to view this journey.
-        </p>
+        <h2 className="text-2xl font-black text-white mb-2">This story is private</h2>
+        <p className="text-slate-500 max-w-md mb-8">You don’t have permission to view this journey.</p>
         <button
           onClick={() => navigate(-1)}
           className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold transition"
@@ -83,53 +98,36 @@ const StoryView = () => {
     );
   }
 
-  if (!story) {
-    return (
-      <div className="text-center py-20 text-white">
-        Story not found
-      </div>
-    );
-  }
+  if (!story) return <div className="text-center py-20 text-white">Story not found</div>;
 
   /* ===================== UI ===================== */
-
   return (
     <div className="min-h-screen bg-[#0a0c10] text-slate-300 relative">
-
       {/* TOP NAV */}
-      <nav className="sticky top-6 z-40 bg-[#0a0c10]/80 backdrop-blur-md border-b border-white/5 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center mt-10">
+      <nav className="sticky top-16 z-40 bg-[#0a0c10]/80 backdrop-blur-md border-b border-white/5 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
           <button
             onClick={() => navigate(-1)}
             className="group flex items-center gap-2 text-slate-400 hover:text-white transition"
           >
             <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="text-xs font-bold uppercase tracking-widest">
-              Return
-            </span>
+            <span className="text-sm font-bold uppercase tracking-widest">Return</span>
           </button>
 
-          <p className="text-sm font-medium text-white">
-            Journey to {story.destination}
-          </p>
+          
         </div>
       </nav>
 
       {/* MAIN CONTENT */}
-      <div className="max-w-7xl mx-auto px-6 py-12 pb-32">
+      <div className="max-w-7xl mx-auto px-6 py-25 pb-32">
         <div className="space-y-10">
-
           {/* HEADER */}
           <div className="flex items-center gap-4">
             <img
-              src={
-                story.userId?.avatar ||
-                `https://ui-avatars.com/api/?name=${story.userId?.fullName || "User"}`
-              }
+              src={story.userId?.avatar || `https://ui-avatars.com/api/?name=${story.userId?.fullName || "User"}`}
               alt="avatar"
               className="w-16 h-16 rounded-2xl object-cover border border-white/10"
             />
-
             <div>
               <h1 className="text-4xl md:text-6xl font-black text-white tracking-tighter">
                 {story.destination}
@@ -141,7 +139,7 @@ const StoryView = () => {
             </div>
           </div>
 
-          {/* INFO */}
+          {/* INFO TILES */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <InfoTile icon={<MapPin size={16} />} label="Destination" value={story.destination} />
             <InfoTile icon={<Clock size={16} />} label="Duration" value={story.duration} />
@@ -158,45 +156,42 @@ const StoryView = () => {
         </div>
       </div>
 
-      {/* ASK AI BUTTON */}
-      {!showAI && (
-        <button
-          onClick={() => setShowAI(true)}
-          className="fixed bottom-6 right-6 z-40 flex items-center gap-3 px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-2xl transition active:scale-95"
-        >
-          <MessageSquare size={20} />
-          Ask AI
-        </button>
-      )}
+      {/* FLOATING ACTION BUTTONS */}
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col gap-3">
+        {/* SHARE BUTTON (Mobile Optimized) */}
+        {!showAI && (
+          <button
+            onClick={handleShare}
+            className="flex items-center justify-center w-14 h-14 bg-white/5 border border-white/10 backdrop-blur-xl text-white rounded-2xl shadow-2xl transition hover:bg-white/10 active:scale-95"
+          >
+            {copied ? <Check size={20} className="text-green-500" /> : <Share2 size={20} />}
+          </button>
+        )}
 
-      {/* BACKDROP */}
+        {/* ASK AI BUTTON */}
+        {!showAI && (
+          <button
+            onClick={() => setShowAI(true)}
+            className="flex items-center gap-3 px-6 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-2xl shadow-2xl transition active:scale-95"
+          >
+            <MessageSquare size={20} />
+            Ask AI
+          </button>
+        )}
+      </div>
+
+      {/* AI PANEL LOGIC (Remains the same) */}
       {showAI && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
-          onClick={() => setShowAI(false)}
-        />
+        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setShowAI(false)} />
       )}
-
-      {/* AI PANEL */}
-      <div
-        className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-500 ${
-          showAI ? "translate-y-0" : "translate-y-full"
-        }`}
-      >
+      <div className={`fixed inset-x-0 bottom-0 z-50 transition-transform duration-500 ${showAI ? "translate-y-0" : "translate-y-full"}`}>
         <div className="bg-[#0a0c10] border-t border-white/10 rounded-t-[2.5rem] shadow-2xl max-h-[85vh] overflow-hidden">
-
-          {/* HEADER */}
           <div className="p-4 border-b border-white/10 flex items-center justify-between">
             <h3 className="text-lg font-bold text-white">AI Companion</h3>
-            <button
-              onClick={() => setShowAI(false)}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition"
-            >
+            <button onClick={() => setShowAI(false)} className="p-2 rounded-xl bg-slate-800 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition">
               <X size={22} />
             </button>
           </div>
-
-          {/* CHAT */}
           <div className="h-[70vh]">
             <StoryChatbot storyId={story._id} />
           </div>
@@ -206,15 +201,11 @@ const StoryView = () => {
   );
 };
 
-/* ===================== INFO TILE ===================== */
-
 const InfoTile = ({ icon, label, value }) => (
   <div className="p-4 rounded-3xl border border-white/10 bg-white/[0.03]">
     <div className="flex items-center gap-2 mb-1 opacity-60">
       {icon}
-      <span className="text-[9px] uppercase font-black tracking-widest">
-        {label}
-      </span>
+      <span className="text-[9px] uppercase font-black tracking-widest">{label}</span>
     </div>
     <p className="text-white font-bold text-sm truncate">{value}</p>
   </div>

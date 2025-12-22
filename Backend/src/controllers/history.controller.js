@@ -27,7 +27,7 @@ export const getUserHistory = asyncHandler(async (req, res) => {
   const history = await History.find({ userId: req.user._id })
     .populate({
       path: "userId",
-      select: "fullName avatar", // Make sure "avatar" is included here
+      select: "fullName avatar", 
     })
     .populate({
       path: "storyId",
@@ -43,7 +43,7 @@ export const getUserHistory = asyncHandler(async (req, res) => {
 export const deleteHistory = asyncHandler(async (req, res) => {
   const history = await History.findOneAndDelete({
     _id: req.params.id,
-    userId: req.user._id, // Security: Ensures users only delete their own data
+    userId: req.user._id, // Security:  users only delete their own data
   });
 
   if (!history) {

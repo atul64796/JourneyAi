@@ -72,12 +72,12 @@ export default function About() {
           {[
             {
               title: "Our Mission",
-              desc: "Empowering global teams to design hyper-personalized customer experiences with precision.",
+              desc: "To empower people to share their journeys and experiences through meaningful storytelling by providing an intuitive, AI-assisted platform that inspires creativity, connection, and authentic expression.",
               icon: <Target className="text-sky-400" size={32} />,
             },
             {
               title: "Our Vision",
-              desc: "A world where technology anticipates human needs, making every digital interaction feel natural.",
+              desc: "To become a global storytelling community where technology bridges cultures and emotions, enabling people from around the world to connect through real stories, shared experiences, and memorable journeys.",
               icon: <Brain className="text-purple-400" size={32} />,
             },
           ].map((item, idx) => (
