@@ -8,7 +8,7 @@ import Navbar from "./components/Pages/Navbar";
 import Profile from "./components/Pages/Profile/Profile";
 import AdminPanel from "./components/Admin/AdminPanel";
 import Dashboard from "./components/Pages/Dashboard/Dashboard";
-import UpdateAccount from "./components/pages/update-Account/UpdateAccount";
+import UpdateAccount from "./components/Pages/update-Account/UpdateAccount";
 import ChangePassword from "./components/Pages/update-Account/ChangePassword";
 import ProtectedRoute from "./components/pages/ProtectRoute/index";
 import AdminRoute from "./components/pages/ProtectRoute/AdminRoute";
