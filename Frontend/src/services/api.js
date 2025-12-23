@@ -1,10 +1,10 @@
 import axios from "axios";
 
-export const API_BASE = "http://localhost:8000/j1/v1";
+
 export const TOKEN_KEY = "accessToken";
 
 export const api = axios.create({
-  baseURL: API_BASE,
+  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true, // allow cookie auth
   headers: { Accept: "application/json" },
 });
