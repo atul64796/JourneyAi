@@ -17,7 +17,6 @@ dotenv.config();
 const app = express();
 
 /* ===================== BODY PARSERS ===================== */
-/* ⚠️ MUST BE BEFORE ROUTES */
 app.use(express.json({ limit: "16kb" }));
 app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 app.use(cookieParser());
@@ -25,35 +24,19 @@ app.use(cookieParser());
 /* ===================== STATIC FILES ===================== */
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
-/* ===================== CORS (PRODUCTION SAFE) ===================== */
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(",").map(o => o.trim())
-  : [
+/* ===================== CORS (FIXED & SAFE) ===================== */
+app.use(
+  cors({
+    origin: [
       "http://localhost:5173",
       "http://localhost:5174",
       "https://journey-ai-delta.vercel.app",
-    ];
-
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow Postman, mobile apps, SSR
-      if (!origin) return callback(null, true);
-
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("Not allowed by CORS"));
-    },
+    ],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// Preflight support (VERY IMPORTANT)
-app.options(/.*/, cors());
 
 /* ===================== HEALTH CHECK ===================== */
 app.get("/", (req, res) => {
@@ -62,7 +45,6 @@ app.get("/", (req, res) => {
     message: "Journey AI Backend is running 🚀",
   });
 });
-
 
 /* ===================== API ROUTES ===================== */
 app.use("/j1/v1/user", User);
