@@ -29,7 +29,7 @@ const allowedOrigins = process.env.CORS_ORIGIN
   : [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://journey-ai-hjix.vercel.app",
+      "https://journey-ai-pink.vercel.app/",
     ];
 
 app.use(
