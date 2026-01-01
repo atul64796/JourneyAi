@@ -32,6 +32,16 @@ function Register() {
   const coverImageFile = watch("coverImage");
 
   const onSubmit = async (formData) => {
+    // ✅ avatar validation (backend requires it)
+    if (!formData.avatar?.[0]) {
+      Swal.fire({
+        icon: "error",
+        title: "Avatar Required",
+        text: "Please upload an avatar image",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const fd = new FormData();
@@ -39,18 +49,15 @@ function Register() {
       fd.append("fullName", formData.fullName);
       fd.append("email", formData.email);
       fd.append("password", formData.password);
-      fd.append("avatar", formData.avatar[0]); // REQUIRED
+      fd.append("avatar", formData.avatar[0]);
+
       if (formData.coverImage?.[0]) {
         fd.append("coverImage", formData.coverImage[0]);
       }
 
-     
-      await api.post("/user/register", fd, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          },
-      });
-      
+      // ✅ DO NOT set Content-Type manually
+      await api.post("/user/register", fd);
+
       Swal.fire({
         title: "Success",
         text: "Account created successfully!",
