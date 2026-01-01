@@ -23,14 +23,32 @@ const allowedOrigins = [
   "https://journey-ai-delta.vercel.app",
 ];
 
+
+
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "https://journey-ai-delta.vercel.app",
+      ];
+
+      // allow requests with no origin (Postman, SSR, mobile apps)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
 
 /* ===================== BODY PARSERS ===================== */
 app.use(express.json({ limit: "16kb" }));
