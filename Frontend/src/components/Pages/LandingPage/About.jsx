@@ -28,38 +28,54 @@ export default function About() {
 
   const sliderSettings = {
     dots: true,
-    infinite: feedbacks.length > 3,
+    infinite: feedbacks.length > 1,
     speed: 800,
     autoplay: true,
     autoplaySpeed: 4000,
     slidesToShow: 3,
     slidesToScroll: 1,
     arrows: false,
+    swipeToSlide: true, // Better for mobile touch
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 2 } },
-      { breakpoint: 640, settings: { slidesToShow: 1 } },
+      { 
+        breakpoint: 1280, 
+        settings: { slidesToShow: 3 } 
+      },
+      { 
+        breakpoint: 1024, 
+        settings: { slidesToShow: 2, dots: true } 
+      },
+      { 
+        breakpoint: 768, 
+        settings: { slidesToShow: 1, centerMode: true, centerPadding: "20px" } 
+      },
+      { 
+        breakpoint: 480, 
+        settings: { slidesToShow: 1, centerMode: false, dots: true } 
+      },
     ],
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-100 selection:bg-sky-500/30">
+    <main className="min-h-screen bg-slate-950 text-slate-100 selection:bg-sky-500/30 overflow-x-hidden">
       {/* Background Decorative Glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[500px] bg-sky-500/10 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[300px] md:h-[500px] bg-sky-500/10 blur-[80px] md:blur-[120px] pointer-events-none" />
 
       {/* Hero Section */}
-      <section className="relative max-w-7xl mx-auto px-6 py-28 text-center">
+      <section className="relative max-w-7xl mx-auto px-6 py-20 md:py-28 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <span className="px-4 py-1.5 rounded-full border border-sky-500/30 bg-sky-500/5 text-sky-400 text-sm font-medium mb-6 inline-block">
+          <span className="px-4 py-1.5 rounded-full border border-sky-500/30 bg-sky-500/5 text-sky-400 text-xs md:text-sm font-medium mb-6 inline-block">
             Our Story
           </span>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight mb-6 md:mb-8 bg-gradient-to-b from-white to-slate-400 bg-clip-text text-transparent">
             About Journey AI
           </h1>
-          <p className="text-slate-400 max-w-2xl mx-auto text-lg md:text-xl leading-relaxed">
+          <p className="text-slate-400 max-w-2xl mx-auto text-base md:text-xl leading-relaxed">
             We are bridging the gap between raw data and human experience through 
             intelligent, AI-driven journey optimization.
           </p>
@@ -67,41 +83,43 @@ export default function About() {
       </section>
 
       {/* Mission & Vision */}
-      <section className="max-w-7xl mx-auto px-6 pb-32">
-        <div className="grid gap-8 md:grid-cols-2">
+      <section className="max-w-7xl mx-auto px-6 pb-20 md:pb-32">
+        <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2">
           {[
             {
               title: "Our Mission",
-              desc: "To empower people to share their journeys and experiences through meaningful storytelling by providing an intuitive, AI-assisted platform that inspires creativity, connection, and authentic expression.",
-              icon: <Target className="text-sky-400" size={32} />,
+              desc: "To empower people to share their journeys through an intuitive platform that inspires creativity and authentic expression.",
+              icon: <Target className="text-sky-400" size={28} />,
             },
             {
               title: "Our Vision",
-              desc: "To become a global storytelling community where technology bridges cultures and emotions, enabling people from around the world to connect through real stories, shared experiences, and memorable journeys.",
-              icon: <Brain className="text-purple-400" size={32} />,
+              desc: "To become a global storytelling community where technology bridges cultures, connecting people through shared experiences.",
+              icon: <Brain className="text-purple-400" size={28} />,
             },
           ].map((item, idx) => (
             <motion.div
               key={idx}
-              whileHover={{ scale: 1.02 }}
-              className="group p-8 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-sky-500/50 transition-all duration-300 shadow-2xl"
+              initial={{ opacity: 0, scale: 0.95 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              className="group p-6 md:p-8 rounded-3xl bg-slate-900/50 border border-slate-800 hover:border-sky-500/50 transition-all duration-300 shadow-xl"
             >
-              <div className="mb-6 p-3 bg-slate-950 w-fit rounded-2xl border border-slate-800 group-hover:shadow-[0_0_20px_rgba(56,189,248,0.2)]">
+              <div className="mb-4 md:mb-6 p-3 bg-slate-950 w-fit rounded-2xl border border-slate-800 group-hover:shadow-[0_0_20px_rgba(56,189,248,0.2)]">
                 {item.icon}
               </div>
-              <h2 className="text-2xl font-bold mb-4">{item.title}</h2>
-              <p className="text-slate-400 leading-relaxed">{item.desc}</p>
+              <h2 className="text-xl md:text-2xl font-bold mb-3 md:mb-4">{item.title}</h2>
+              <p className="text-slate-400 text-sm md:text-base leading-relaxed">{item.desc}</p>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* Feedback Slider */}
-      <section className="relative bg-slate-900/30 border-y border-slate-800 py-32 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our User Say's</h2>
-            <div className="h-1 w-20 bg-sky-500 mx-auto rounded-full" />
+      <section className="relative bg-slate-900/30 border-y border-slate-800 py-20 md:py-32 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 md:px-6">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-2xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
+            <div className="h-1 w-16 md:w-20 bg-sky-500 mx-auto rounded-full" />
           </div>
 
           {loading ? (
@@ -109,58 +127,75 @@ export default function About() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
             </div>
           ) : (
-            <Slider {...sliderSettings} className="feedback-slider">
-              {feedbacks.map((fb) => (
-                <div key={fb._id} className="px-4 py-6">
-                  <div className="bg-slate-950/40 backdrop-blur-md border border-slate-800 p-8 rounded-3xl h-full flex flex-col justify-between relative group hover:bg-slate-900/60 transition-colors duration-300">
-                    <Quote className="absolute top-6 right-8 text-slate-800 group-hover:text-sky-500/20 transition-colors" size={40} />
-                    
-                    <div>
-                      <div className="flex items-center gap-4 mb-6">
-                        <img
-                          src={fb.user?.avatar || "/avatar.png"}
-                          alt={fb.user?.fullName}
-                          className="w-14 h-14 rounded-2xl object-cover ring-2 ring-slate-800 group-hover:ring-sky-500/50 transition-all"
-                        />
-                        <div>
-                          <h4 className="font-semibold text-white text-lg leading-tight">
-                            {fb.user?.fullName}
-                          </h4>
-                          <span className="text-xs font-medium text-sky-400 uppercase tracking-wider">
-                            {fb.storyId?.destination || "Journey Expert"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex gap-1 mb-4">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            size={14} 
-                            className={i < (fb.rating || 5) ? "fill-yellow-500 text-yellow-500" : "text-slate-700"} 
+            <div className="mx-[-10px]"> {/* Negative margin to offset slider padding */}
+              <Slider {...sliderSettings} className="feedback-slider custom-dots">
+                {feedbacks.map((fb) => (
+                  <div key={fb._id} className="px-2 md:px-4 py-6">
+                    <div className="bg-slate-950/60 backdrop-blur-md border border-slate-800 p-6 md:p-8 rounded-[2rem] h-full flex flex-col justify-between relative group transition-all duration-300">
+                      <Quote className="absolute top-4 right-6 text-slate-800/50 md:text-slate-800 group-hover:text-sky-500/20 transition-colors" size={32} />
+                      
+                      <div>
+                        <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
+                          <img
+                            src={fb.user?.avatar || "/avatar.png"}
+                            alt={fb.user?.fullName}
+                            className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl object-cover ring-2 ring-slate-800"
                           />
-                        ))}
+                          <div className="overflow-hidden">
+                            <h4 className="font-semibold text-white text-sm md:text-lg truncate">
+                              {fb.user?.fullName}
+                            </h4>
+                            <span className="text-[10px] md:text-xs font-medium text-sky-400 uppercase tracking-wider block truncate">
+                              {fb.storyId?.destination || "Journey Expert"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-0.5 mb-3 md:mb-4">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              size={12} 
+                              className={i < (fb.rating || 5) ? "fill-yellow-500 text-yellow-500" : "text-slate-700"} 
+                            />
+                          ))}
+                        </div>
+
+                        <p className="text-slate-300 italic text-sm md:text-base leading-relaxed mb-6">
+                          “{fb.comment || fb.feedback}”
+                        </p>
                       </div>
 
-                      <p className="text-slate-300 italic leading-relaxed mb-6">
-                        “{fb.comment || fb.feedback}”
-                      </p>
+                      {fb.sentiment && (
+                        <span className={`text-[9px] w-fit px-2 py-0.5 rounded-full border font-bold uppercase tracking-widest ${
+                          fb.sentiment === 'positive' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-500/10 border-slate-500/30 text-slate-400'
+                        }`}>
+                          {fb.sentiment}
+                        </span>
+                      )}
                     </div>
-
-                    {fb.sentiment && (
-                      <span className={`text-[10px] w-fit px-2 py-0.5 rounded-full border font-bold uppercase tracking-widest ${
-                        fb.sentiment === 'positive' ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-slate-500/10 border-slate-500/30 text-slate-400'
-                      }`}>
-                        {fb.sentiment}
-                      </span>
-                    )}
                   </div>
-                </div>
-              ))}
-            </Slider>
+                ))}
+              </Slider>
+            </div>
           )}
         </div>
       </section>
+      
+      {/* Small style tweak for slider dots visibility on mobile */}
+      <style jsx global>{`
+        .custom-dots .slick-dots li button:before {
+          color: #38bdf8 !important;
+          font-size: 8px;
+        }
+        .custom-dots .slick-dots li.slick-active button:before {
+          color: #38bdf8 !important;
+          font-size: 10px;
+        }
+        .feedback-slider .slick-list {
+          overflow: visible;
+        }
+      `}</style>
     </main>
   );
 }

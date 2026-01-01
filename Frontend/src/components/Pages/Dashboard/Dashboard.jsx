@@ -8,8 +8,8 @@ import "slick-carousel/slick/slick-theme.css";
 
 import { 
   MapPin, RefreshCw, Sparkles, 
-  Languages, Clock, Lock, Unlock, Compass, RotateCcw,
-  Share2, Check // Added Share and Check icons
+  Lock, Unlock, Compass, RotateCcw,
+  Share2, Check 
 } from "lucide-react";
 
 import FeedbackSection from "../Feedback/FeedbackSection.jsx"; 
@@ -36,7 +36,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false); // New state for copy feedback
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (story) {
@@ -44,32 +44,21 @@ export default function Dashboard() {
     }
   }, [story]);
 
-  /* ===================== SHARE LOGIC ===================== */
   const handleShare = async () => {
     if (!story) return;
-
     const shareUrl = `${window.location.origin}/stories/${story._id}`;
-    const shareText = `Check out my AI-generated journey to ${story.destination}!\n\n"${story.storyText.substring(0, 100)}..."`;
+    const shareText = `Check out my AI-generated journey to ${story.destination}!`;
 
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: `Voyage Scribe: ${story.destination}`,
-          text: shareText,
-          url: shareUrl,
-        });
-      } catch (err) {
-        console.error("Error sharing:", err);
-      }
+        await navigator.share({ title: `Voyage Scribe`, text: shareText, url: shareUrl });
+      } catch (err) { console.error("Error sharing:", err); }
     } else {
-      // Fallback: Copy to Clipboard
       try {
         await navigator.clipboard.writeText(shareUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        setError("Could not copy link to clipboard.");
-      }
+      } catch (err) { setError("Could not copy link."); }
     }
   };
 
@@ -103,25 +92,24 @@ export default function Dashboard() {
     try {
       const res = await createStory(formData);
       setStory(res.data);
-    } catch (err) {
-      setError("The AI scribe's ink has dried. Try again.");
-    } finally {
-      setLoading(false);
-    }
+      // Auto-scroll to story on mobile after generation
+      if (window.innerWidth < 1024) {
+        setTimeout(() => {
+            document.getElementById('story-output-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 500);
+      }
+    } catch (err) { setError("The AI scribe's ink has dried."); }
+    finally { setLoading(false); }
   };
 
   const handleRegenerate = async () => {
     if (!story?._id) return;
     setIsRegenerating(true);
-    setError("");
     try {
       const res = await regenerateStory(story._id);
       setStory(res.data);
-    } catch (err) {
-      setError("Failed to rewrite the tale.");
-    } finally {
-      setIsRegenerating(false);
-    }
+    } catch (err) { setError("Failed to rewrite."); }
+    finally { setIsRegenerating(false); }
   };
 
   const displayImages = story?.images?.length > 0 ? story.images : [
@@ -131,10 +119,11 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-[#0a0a0a] text-white overflow-hidden pt-16">
+    // Changed h-screen to min-h-screen and removed overflow-hidden on mobile
+    <div className="flex flex-col lg:flex-row min-h-screen lg:h-screen bg-[#0a0a0a] text-white pt-16 lg:overflow-hidden">
       
-      {/* LEFT PANEL */}
-      <div className="w-full lg:w-[55%] h-[40vh] lg:h-full relative overflow-hidden flex-shrink-0 group">
+      {/* LEFT PANEL - Hero / Slider */}
+      <div className="w-full lg:w-[50%] xl:w-[55%] h-[40vh] lg:h-full relative flex-shrink-0 group">
         <Slider {...sliderSettings} className="h-full w-full">
           {displayImages.map((img, idx) => (
             <div key={idx} className="relative h-[40vh] lg:h-[calc(100vh-64px)] outline-none">
@@ -143,7 +132,7 @@ export default function Dashboard() {
             </div>
           ))}
         </Slider>
-        <div className="absolute top-6 left-6 lg:top-12 lg:left-12 z-20">
+        <div className="absolute bottom-10 left-6 lg:top-12 lg:left-12 z-20">
           <div className="flex items-center gap-3 mb-2 opacity-80">
             <div className="h-[1px] w-8 bg-indigo-500" />
             <span className="text-[10px] font-black tracking-[0.4em] uppercase text-indigo-400">Voyage Scribe</span>
@@ -154,12 +143,12 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* RIGHT PANEL */}
-      <div className="w-full lg:w-[45%] h-[60vh] lg:h-full bg-[#0d0d0d] flex flex-col border-l border-white/5 relative shadow-2xl">
+      {/* RIGHT PANEL - Content Area */}
+      <div className="w-full lg:w-[50%] xl:w-[45%] flex flex-col bg-[#0d0d0d] border-l border-white/5 relative shadow-2xl overflow-y-auto lg:overflow-hidden">
         
-        {/* Form Section */}
-        <div className="p-6 lg:p-10 border-b border-white/5 bg-[#0d0d0d]/80 backdrop-blur-md z-30">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Form Section - Stay at top on mobile */}
+        <div className="p-6 lg:p-10 border-b border-white/5 bg-[#0d0d0d]/90 backdrop-blur-md sticky top-0 lg:static z-40">
+          <form onSubmit={handleSubmit} className="space-y-4 max-w-xl mx-auto">
             <div className="space-y-1">
               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Location</label>
               <div className="relative group">
@@ -172,32 +161,33 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              <select name="mood" required value={formData.mood} onChange={handleChange} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl text-sm outline-none appearance-none cursor-pointer">
-                <option value="" className="bg-black text-white">Mood</option>
-                <option value="adventurous" className="bg-black">Adventurous</option>
-                <option value="relaxed" className="bg-black">Relaxed</option>
-                <option value="romantic" className="bg-black">Romantic</option>
-                <option value="mysterious" className="bg-black">Mysterious</option>
-              </select>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="relative">
+                <select name="mood" required value={formData.mood} onChange={handleChange} className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl text-sm outline-none appearance-none cursor-pointer">
+                  <option value="" className="bg-black">Mood</option>
+                  {["Adventurous", "Relaxed", "Romantic", "Mysterious"].map(m => (
+                    <option key={m} value={m.toLowerCase()} className="bg-black">{m}</option>
+                  ))}
+                </select>
+              </div>
 
               <button 
                 type="submit" disabled={loading}
-                className="h-[52px] bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                className="h-[52px] bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 shadow-lg shadow-indigo-600/20"
               >
                 {loading ? <RefreshCw className="animate-spin" size={16} /> : <Sparkles size={16} />}
-                {loading ? "Forging..." : "Generate"}
+                {loading ? "Forging..." : "Generate Tale"}
               </button>
             </div>
 
-            <div className="flex gap-2 pt-2">
-               <select name="language" value={formData.language} onChange={handleChange} className="flex-1 bg-white/5 border border-white/10 text-[15px] p-2 rounded-lg uppercase font-bold text-slate-400 outline-none">
-                  {["English", "Hindi", "Bengali", "Marathi", "Spanish","French"].map(l => (
+            <div className="flex flex-wrap gap-2 pt-2">
+               <select name="language" value={formData.language} onChange={handleChange} className="flex-1 min-w-[100px] bg-white/5 border border-white/10 text-[13px] p-2.5 rounded-lg uppercase font-bold text-slate-400 outline-none">
+                  {["English", "Hindi", "Bengali", "Marathi", "Spanish", "French"].map(l => (
                     <option key={l} value={l.toLowerCase()} className="bg-black">{l}</option>
                   ))}
                </select>
                
-               <select name="duration" value={formData.duration} onChange={handleChange} className="flex-1 bg-white/5 border border-white/10 text-[15px] p-2 rounded-lg uppercase font-bold text-slate-400 outline-none">
+               <select name="duration" value={formData.duration} onChange={handleChange} className="flex-1 min-w-[100px] bg-white/5 border border-white/10 text-[13px] p-2.5 rounded-lg uppercase font-bold text-slate-400 outline-none">
                   <option value="" className="bg-black">Time</option>
                   {["1 Day", "3 Days", "1 Week"].map(d => (
                     <option key={d} value={d.toLowerCase()} className="bg-black">{d}</option>
@@ -206,61 +196,63 @@ export default function Dashboard() {
 
                <button 
                 type="button" onClick={() => setFormData(p => ({...p, isPublic: !p.isPublic}))}
-                className={`px-5 rounded-lg border flex items-center gap-2 transition-all ${formData.isPublic ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-400' : 'border-white/10 bg-white/5 text-slate-500'}`}
+                className={`flex-grow sm:flex-grow-0 px-4 py-2.5 rounded-lg border flex items-center justify-center gap-2 transition-all ${formData.isPublic ? 'border-indigo-500/40 bg-indigo-500/10 text-indigo-400' : 'border-white/10 bg-white/5 text-slate-500'}`}
                >
-                 {formData.isPublic ? <Unlock size={15}/> : <Lock size={15}/>}
-                 <span className="text-[12px] font-bold uppercase">{formData.isPublic ? 'Public' : 'Private'}</span>
+                 {formData.isPublic ? <Unlock size={14}/> : <Lock size={14}/>}
+                 <span className="text-[10px] font-bold uppercase">{formData.isPublic ? 'Public' : 'Private'}</span>
                </button>
             </div>
           </form>
           {error && <p className="text-red-400 text-[10px] mt-4 font-bold uppercase tracking-widest text-center">{error}</p>}
         </div>
 
-        {/* Story Output */}
-        <div className="flex-grow overflow-y-auto p-8 lg:p-14 custom-scrollbar bg-gradient-to-b from-[#0d0d0d] to-black">
+        {/* Story Output Section - Adjust padding and text for mobile */}
+        <div id="story-output-section" className="flex-grow overflow-y-auto p-6 md:p-10 lg:p-14 custom-scrollbar bg-gradient-to-b from-[#0d0d0d] to-black">
           {story ? (
-            <div className="max-w-2xl mx-auto space-y-10 animate-in fade-in slide-in-from-bottom-10 duration-1000">
+            <div className="max-w-2xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-6 duration-700">
               <div className="flex items-center justify-center gap-6 opacity-20">
                  <div className="h-[1px] flex-grow bg-white" />
                  <Compass size={18} />
                  <div className="h-[1px] flex-grow bg-white" />
               </div>
               
-              <p className="text-xl lg:text-3xl font-serif leading-[2] text-slate-200 font-light text-center lg:text-left selection:bg-indigo-500/30">
-                {story.storyText}
-              </p>
+              <article className="prose prose-invert max-w-none">
+                <p className="text-lg md:text-xl lg:text-2xl font-serif leading-[1.8] md:leading-[2] text-slate-200 font-light selection:bg-indigo-500/30">
+                  {story.storyText}
+                </p>
+              </article>
 
-              <div className="pt-10 flex flex-col items-center gap-8 border-t border-white/5">
-                <div className="flex items-center gap-4">
-                  {/* REGENERATE BUTTON */}
-                  <button 
-                    onClick={handleRegenerate}
-                    disabled={isRegenerating}
-                    className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50"
-                  >
-                    <RotateCcw size={14} className={isRegenerating ? "animate-spin" : ""} />
-                    {isRegenerating ? "Rewriting..." : "Regenerate Tale"}
-                  </button>
+              <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-4 border-t border-white/5">
+                {/* REGENERATE BUTTON */}
+                <button 
+                  onClick={handleRegenerate}
+                  disabled={isRegenerating}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95"
+                >
+                  <RotateCcw size={14} className={isRegenerating ? "animate-spin" : ""} />
+                  {isRegenerating ? "Rewriting..." : "Regenerate"}
+                </button>
 
-                  {/* SHARE BUTTON */}
-                  <button 
-                    onClick={handleShare}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 border ${
-                      copied ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-indigo-600/10 border-indigo-500/50 text-indigo-400 hover:bg-indigo-600 hover:text-white'
-                    }`}
-                  >
-                    {copied ? <Check size={14} /> : <Share2 size={14} />}
-                    {copied ? "Link Copied!" : "Share Story"}
-                  </button>
-                </div>
-                
-                <FeedbackSection storyId={story._id} />
+                {/* SHARE BUTTON */}
+                <button 
+                  onClick={handleShare}
+                  className={`w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest transition-all active:scale-95 border ${
+                    copied ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-indigo-600 border-indigo-500 text-white hover:bg-indigo-500'
+                  }`}
+                >
+                  {copied ? <Check size={14} /> : <Share2 size={14} />}
+                  {copied ? "Copied!" : "Share Story"}
+                </button>
+              </div>
+              
+              <div className="pt-4">
+                 <FeedbackSection storyId={story._id} />
               </div>
             </div>
           ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center opacity-30">
-              <div className="w-16 h-16 rounded-full border border-dashed border-indigo-500/50 flex items-center justify-center mb-6 animate-[spin_10s_linear_infinite]">
-                <Sparkles size={24} className="text-indigo-500" />
+            <div className="h-64 lg:h-full flex flex-col items-center justify-center text-center opacity-30">
+              <div className="w-12 h-12 rounded-full border border-dashed border-indigo-500/50 flex items-center justify-center mb-6 animate-[spin_10s_linear_infinite]">
+                <Sparkles size={20} className="text-indigo-500" />
               </div>
               <p className="text-[10px] uppercase tracking-[0.5em] font-black italic">Awaiting your journey...</p>
             </div>
@@ -273,10 +265,7 @@ export default function Dashboard() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #222; border-radius: 10px; }
         .slick-slider, .slick-list, .slick-track { height: 100% !important; }
-        .custom-dots { bottom: 30px !important; left: 30px !important; width: auto !important; text-align: left !important; z-index: 40; }
-        .custom-dots li { margin: 0; }
-        .custom-dots li button:before { color: white !important; font-size: 6px !important; opacity: 0.3; }
-        .custom-dots li.slick-active button:before { color: #6366f1 !important; opacity: 1; }
+        .custom-dots { bottom: 20px !important; left: 20px !important; width: auto !important; text-align: left !important; z-index: 40; }
         @import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@200;400;700&display=swap');
         .font-serif { font-family: 'Crimson Pro', serif; }
       `}</style>
