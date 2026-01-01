@@ -32,54 +32,56 @@ function Register() {
   const coverImageFile = watch("coverImage");
 
   const onSubmit = async (formData) => {
-    // ✅ avatar validation (backend requires it)
+  setLoading(true);
+  try {
     if (!formData.avatar?.[0]) {
       Swal.fire({
         icon: "error",
-        title: "Avatar Required",
+        title: "Avatar required",
         text: "Please upload an avatar image",
+        background: "#0f172a",
+        color: "#fff",
       });
       return;
     }
 
-    setLoading(true);
-    try {
-      const fd = new FormData();
-      fd.append("username", formData.username);
-      fd.append("fullName", formData.fullName);
-      fd.append("email", formData.email);
-      fd.append("password", formData.password);
-      fd.append("avatar", formData.avatar[0]);
+    const fd = new FormData();
+    fd.append("username", formData.username.trim());
+    fd.append("fullName", formData.fullName.trim());
+    fd.append("email", formData.email.trim());
+    fd.append("password", formData.password);
+    fd.append("avatar", formData.avatar[0]);
 
-      if (formData.coverImage?.[0]) {
-        fd.append("coverImage", formData.coverImage[0]);
-      }
-
-      // ✅ DO NOT set Content-Type manually
-      await api.post("/user/register", fd);
-
-      Swal.fire({
-        title: "Success",
-        text: "Account created successfully!",
-        icon: "success",
-        background: "#0f172a",
-        color: "#fff",
-        confirmButtonColor: "#7c3aed",
-      });
-
-      navigate("/login");
-    } catch (err) {
-      Swal.fire({
-        title: "Error",
-        text: err.response?.data?.message || "Something went wrong",
-        icon: "error",
-        background: "#0f172a",
-        color: "#fff",
-      });
-    } finally {
-      setLoading(false);
+    if (formData.coverImage?.[0]) {
+      fd.append("coverImage", formData.coverImage[0]);
     }
-  };
+
+    // 🔥 DO NOT SET CONTENT-TYPE
+    await api.post("/user/register", fd);
+
+    Swal.fire({
+      title: "Success",
+      text: "Account created successfully!",
+      icon: "success",
+      background: "#0f172a",
+      color: "#fff",
+      confirmButtonColor: "#7c3aed",
+    });
+
+    navigate("/login");
+  } catch (err) {
+    Swal.fire({
+      title: "Error",
+      text: err.response?.data?.message || err.message,
+      icon: "error",
+      background: "#0f172a",
+      color: "#fff",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-900 px-4 py-6">
