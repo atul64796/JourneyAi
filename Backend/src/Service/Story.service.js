@@ -27,7 +27,7 @@ const extractTextFromResponse = (response) => {
 
 const callGroqWithRetry = async (prompt, retries = 2) => {
   try {
-    // FIXED: Correct method is chat.completions.create
+    
     const response = await client.chat.completions.create({
       model: TEXT_MODEL,
       messages: [{ role: "user", content: prompt }],
