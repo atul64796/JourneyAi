@@ -53,7 +53,7 @@ app.use(
 );
 
 // Preflight support (VERY IMPORTANT)
-app.options("*", cors());
+app.options(/.*/, cors());
 
 /* ===================== HEALTH CHECK ===================== */
 app.get("/", (req, res) => {
@@ -62,6 +62,7 @@ app.get("/", (req, res) => {
     message: "Journey AI Backend is running 🚀",
   });
 });
+
 
 /* ===================== API ROUTES ===================== */
 app.use("/j1/v1/user", User);
