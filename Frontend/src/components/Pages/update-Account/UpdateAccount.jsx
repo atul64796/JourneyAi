@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Swal from "sweetalert2";
 import api from "../../../services/api";
-import { useNavigate } from "react-router-dom"; // Added navigate
+import { useNavigate } from "react-router-dom";
 import { User, Mail, Loader2, Save, BadgeCheck, ArrowLeft } from "lucide-react";
 
 function UpdateAccount() {
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Initialize navigate
+  const navigate = useNavigate();
   
   const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
@@ -28,7 +28,7 @@ function UpdateAccount() {
       fullName: currentUser.fullName,
       email: currentUser.email,
     });
-  }, [reset]);
+  }, [reset, currentUser.fullName, currentUser.email]);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -65,37 +65,39 @@ function UpdateAccount() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#09090b] px-4 relative">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#09090b] px-4 py-12 font-sans relative">
       
-      {/* Back Button - Top Left */}
-      <button 
-        onClick={() => navigate(-1)} // Goes back to the previous page
-        className="absolute top-30 left-34 flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group"
-      >
-        <div className="p-2 rounded-full bg-zinc-900 group-hover:bg-zinc-800 border border-zinc-800 transition-all">
-          <ArrowLeft size={18} />
-        </div>
-        <span className="text-sm font-medium">Back</span>
-      </button>
+      {/* Responsive Back Button */}
+      <div className="w-full max-w-md absolute top-6 left-0 px-4 md:fixed md:top-10 md:left-10 lg:left-20">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group"
+        >
+          <div className="p-2 rounded-full bg-zinc-900 group-hover:bg-zinc-800 border border-zinc-800 transition-all">
+            <ArrowLeft size={18} />
+          </div>
+          <span className="text-sm font-medium">Back</span>
+        </button>
+      </div>
 
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-md mt-10 md:mt-0">
         
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-500/10 text-indigo-400 rounded-full mb-4 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.15)]">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-500/10 text-indigo-400 rounded-2xl mb-4 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.15)]">
             <User size={32} />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Account Settings</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">Account Settings</h1>
           <p className="text-zinc-500 text-sm mt-2">Manage your public profile and email</p>
         </div>
 
         {/* Form Card */}
-        <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-3xl p-8 shadow-2xl">
+        <div className="bg-zinc-900/40 backdrop-blur-md border border-zinc-800/50 rounded-3xl p-6 md:p-8 shadow-2xl">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             
             {/* Full Name Field */}
             <div>
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-[0.1em] mb-2 ml-1">
+              <label className="block text-[10px] md:text-xs font-bold text-zinc-500 uppercase tracking-[0.1em] mb-2 ml-1">
                 Display Name
               </label>
               <div className="relative group">
@@ -114,13 +116,13 @@ function UpdateAccount() {
                 />
               </div>
               {errors.fullName && (
-                <p className="text-red-400 text-xs mt-2 ml-1">{errors.fullName.message}</p>
+                <p className="text-red-400 text-xs mt-2 ml-1 italic">{errors.fullName.message}</p>
               )}
             </div>
 
             {/* Email Field */}
             <div>
-              <label className="block text-xs font-bold text-zinc-500 uppercase tracking-[0.1em] mb-2 ml-1">
+              <label className="block text-[10px] md:text-xs font-bold text-zinc-500 uppercase tracking-[0.1em] mb-2 ml-1">
                 Email Address
               </label>
               <div className="relative group">
@@ -145,7 +147,7 @@ function UpdateAccount() {
                 />
               </div>
               {errors.email && (
-                <p className="text-red-400 text-xs mt-2 ml-1">{errors.email.message}</p>
+                <p className="text-red-400 text-xs mt-2 ml-1 italic">{errors.email.message}</p>
               )}
             </div>
 
@@ -154,13 +156,13 @@ function UpdateAccount() {
               <button
                 type="submit"
                 disabled={loading}
-                className="group w-full flex items-center justify-center gap-2 bg-[#4f39f6] text-white hover:bg-zinc-200 text-black font-bold py-4 px-6 rounded-2xl transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-white/5"
+                className="group w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-6 rounded-2xl transition-all active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-indigo-500/10"
               >
                 {loading ? (
                   <Loader2 className="animate-spin" size={20} />
                 ) : (
                   <>
-                    <Save size={20} />
+                    <Save size={20} className="group-hover:scale-110 transition-transform" />
                     Save Changes
                   </>
                 )}
@@ -171,7 +173,7 @@ function UpdateAccount() {
 
         {/* Footer */}
         <div className="mt-8 text-center">
-            <p className="text-zinc-600 text-[10px] uppercase tracking-[0.3em] font-medium">
+            <p className="text-zinc-600 text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-medium">
               Powered by Journey AI Core
             </p>
         </div>

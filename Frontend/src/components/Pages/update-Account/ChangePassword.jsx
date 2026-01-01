@@ -54,24 +54,26 @@ function ChangePassword() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#09090b] px-4 font-sans relative">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#09090b] px-4 py-12 font-sans relative">
       
-      {/* Back Button */}
-      <button 
-        onClick={() => navigate(-1)} 
-        className="absolute top-20 left-40 flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group"
-      >
-        <div className="p-2 rounded-full bg-zinc-900 group-hover:bg-zinc-800 border border-zinc-800 transition-all">
-          <ArrowLeft size={18} />
-        </div>
-        <span className="text-sm font-medium tracking-wide">Back</span>
-      </button>
+      {/* Back Button - Responsive Position */}
+      <div className="w-full max-w-md absolute top-6 left-0 px-4 md:fixed md:top-10 md:left-10 lg:left-20">
+        <button 
+          onClick={() => navigate(-1)} 
+          className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors group"
+        >
+          <div className="p-2 rounded-full bg-zinc-900 group-hover:bg-zinc-800 border border-zinc-800 transition-all">
+            <ArrowLeft size={18} />
+          </div>
+          <span className="text-sm font-medium tracking-wide">Back</span>
+        </button>
+      </div>
 
       <div className="w-full max-w-md">
         
         {/* Header Section */}
-        <div className="text-center mb-8 mt-20">
-          <div className="inline-flex items-center justify-center w-15 h-13 bg-indigo-500/10 text-indigo-500 rounded-2xl mb-4 border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-500/10 text-indigo-500 rounded-2xl mb-4 border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
             <Lock size={28} />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">Change Password</h1>
@@ -79,7 +81,7 @@ function ChangePassword() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+        <div className="bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 rounded-2xl p-6 md:p-8 shadow-2xl">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             
             {/* Current Password */}
@@ -177,8 +179,6 @@ function ChangePassword() {
             </button>
           </form>
         </div>
-
-        
       </div>
     </div>
   );

@@ -46,19 +46,20 @@ export default function About() {
         settings: { slidesToShow: 2 }
       },
       {
-        breakpoint: 768,
+        breakpoint: 768, // Tablet
         settings: { 
           slidesToShow: 1, 
           centerMode: true, 
-          centerPadding: "30px" // Shows a peek of next/prev cards
+          centerPadding: "60px" 
         }
       },
       {
-        breakpoint: 480,
+        breakpoint: 480, // Mobile
         settings: { 
           slidesToShow: 1, 
-          centerMode: false, // Prevents squishing on very small screens
-          centerPadding: "0px" 
+          centerMode: false, // Turn off centerMode to give card full width
+          centerPadding: "0px",
+          dots: true
         }
       },
     ],
@@ -90,7 +91,7 @@ export default function About() {
         </motion.div>
       </section>
 
-      {/* Mission & Vision */}
+      {/* Mission & Vision Section */}
       <section className="max-w-7xl mx-auto px-6 pb-20 md:pb-32">
         <div className="grid gap-6 md:gap-8 grid-cols-1 md:grid-cols-2">
           {[
@@ -122,10 +123,10 @@ export default function About() {
         </div>
       </section>
 
-      {/* Feedback Slider */}
-      <section className="relative bg-slate-900/30 border-y border-slate-800 py-20 md:py-32">
-        <div className="max-w-7xl mx-auto px-4 md:px-6">
-          <div className="text-center mb-12 md:mb-16">
+      {/* Feedback Slider Section */}
+      <section className="relative bg-slate-900/30 border-y border-slate-800 py-16 md:py-32">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-10 md:mb-16">
             <h2 className="text-2xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
             <div className="h-1 w-16 md:w-20 bg-sky-500 mx-auto rounded-full" />
           </div>
@@ -135,11 +136,11 @@ export default function About() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
             </div>
           ) : (
-            <div className="px-2"> 
+            <div className="feedback-container"> 
               <Slider {...sliderSettings} className="feedback-slider custom-dots">
                 {feedbacks.map((fb) => (
-                  <div key={fb._id} className="px-2 md:px-4 py-4">
-                    <div className="bg-slate-950/60 backdrop-blur-md border border-slate-800 p-6 md:p-8 rounded-[2rem] h-full flex flex-col min-h-[250px] justify-between relative group transition-all duration-300">
+                  <div key={fb._id} className="outline-none px-2 py-4">
+                    <div className="mx-auto max-w-[350px] md:max-w-none bg-slate-950/60 backdrop-blur-md border border-slate-800 p-6 md:p-8 rounded-[2rem] flex flex-col min-h-[280px] justify-between relative group transition-all duration-300">
                       <Quote className="absolute top-4 right-6 text-slate-800/50 group-hover:text-sky-500/20 transition-colors" size={32} />
                       
                       <div>
@@ -147,10 +148,10 @@ export default function About() {
                           <img
                             src={fb.user?.avatar || "/avatar.png"}
                             alt={fb.user?.fullName}
-                            className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl object-cover ring-2 ring-slate-800"
+                            className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl object-cover ring-2 ring-slate-800"
                           />
                           <div className="overflow-hidden">
-                            <h4 className="font-semibold text-white text-sm md:text-lg truncate">
+                            <h4 className="font-semibold text-white text-base md:text-lg truncate">
                               {fb.user?.fullName}
                             </h4>
                             <span className="text-[10px] md:text-xs font-medium text-sky-400 uppercase tracking-wider block truncate">
@@ -163,13 +164,13 @@ export default function About() {
                           {[...Array(5)].map((_, i) => (
                             <Star 
                               key={i} 
-                              size={12} 
+                              size={14} 
                               className={i < (fb.rating || 5) ? "fill-yellow-500 text-yellow-500" : "text-slate-700"} 
                             />
                           ))}
                         </div>
 
-                        <p className="text-slate-300 italic text-sm md:text-base leading-relaxed mb-6">
+                        <p className="text-slate-300 italic text-sm md:text-base leading-relaxed mb-4">
                           “{fb.comment || fb.feedback}”
                         </p>
                       </div>
@@ -190,15 +191,17 @@ export default function About() {
         </div>
       </section>
       
-      {/* Styles to fix slick height and dot alignment */}
       <style jsx global>{`
+        .feedback-container {
+          padding-bottom: 40px;
+        }
         .custom-dots .slick-dots {
-          bottom: -40px;
+          bottom: -20px;
         }
         .custom-dots .slick-dots li button:before {
           color: #38bdf8 !important;
           font-size: 8px;
-          opacity: 0.4;
+          opacity: 0.3;
         }
         .custom-dots .slick-dots li.slick-active button:before {
           color: #38bdf8 !important;
@@ -214,8 +217,14 @@ export default function About() {
           display: flex !important;
           justify-content: center;
         }
-        .feedback-slider .slick-slide > div {
-          width: 100%;
+        /* Fixes the width issues on mobile */
+        .feedback-slider .slick-list {
+          margin: 0 -10px;
+        }
+        @media (max-width: 480px) {
+          .feedback-slider .slick-slide {
+            padding: 0 10px;
+          }
         }
       `}</style>
     </main>
