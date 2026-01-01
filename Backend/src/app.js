@@ -22,7 +22,7 @@ const app = express();
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(express.static("public"));
 
-/* ===================== CORS (FIXED) ===================== */
+/* ===================== CORS (FINAL & CORRECT) ===================== */
 
 const allowedOrigins = process.env.CORS_ORIGIN
   ? process.env.CORS_ORIGIN.split(",")
@@ -35,17 +35,14 @@ const allowedOrigins = process.env.CORS_ORIGIN
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (Postman, mobile apps)
+      // Allow Postman / server-to-server requests
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      return callback(
-        new Error(`CORS blocked for origin: ${origin}`),
-        false
-      );
+      return callback(null, false);
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -53,7 +50,13 @@ app.use(
   })
 );
 
-app.options("*", cors());
+// ✅ Express 5 / Node 22 safe preflight handling
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+  next();
+});
 
 /* ===================== MIDDLEWARE ===================== */
 
