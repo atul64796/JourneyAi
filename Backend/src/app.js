@@ -16,37 +16,39 @@ import ttsRoute from "./routes/tts.route.js";
 dotenv.config();
 const app = express();
 
-/* ===================== BODY PARSERS ===================== */
-app.use(express.json({ limit: "16kb" }));
-app.use(express.urlencoded({ extended: true, limit: "16kb" }));
-app.use(cookieParser());
+/* ===================== CORS (SAFE FOR EXPRESS 5) ===================== */
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "https://journey-ai-delta.vercel.app",
+];
 
-/* ===================== STATIC FILES ===================== */
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
-
-/* ===================== CORS (FIXED & SAFE) ===================== */
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "http://localhost:5174",
-      "https://journey-ai-delta.vercel.app",
-    ],
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-/* ===================== HEALTH CHECK ===================== */
+/* ===================== BODY PARSERS ===================== */
+app.use(express.json({ limit: "16kb" }));
+app.use(express.urlencoded({ extended: true, limit: "16kb" }));
+app.use(cookieParser());
+
+/* ===================== STATIC ===================== */
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+/* ===================== HEALTH ===================== */
 app.get("/", (req, res) => {
-  res.status(200).json({
+  res.json({
     success: true,
-    message: "Journey AI Backend is running 🚀",
+    message: "Journey AI Backend running 🚀",
   });
 });
 
-/* ===================== API ROUTES ===================== */
+/* ===================== ROUTES ===================== */
 app.use("/j1/v1/user", User);
 app.use("/j1/v1/stories", storyRoutes);
 app.use("/j1/v1/feedback", feedbackRoute);
@@ -55,7 +57,7 @@ app.use("/j1/v1/admin", adminRoutes);
 app.use("/j1/v1/chat", travelChatbotRoutes);
 app.use("/j1/v1/tts", ttsRoute);
 
-/* ===================== 404 HANDLER ===================== */
+/* ===================== 404 ===================== */
 app.use((req, res) => {
   res.status(404).json({
     success: false,
