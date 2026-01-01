@@ -140,3 +140,7 @@ config/*.pem
 .env.stage
 .env.production
 .env.development
+
+
+.env
+Backend/.env

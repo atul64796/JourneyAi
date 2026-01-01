@@ -35,23 +35,31 @@ export default function About() {
     slidesToShow: 3,
     slidesToScroll: 1,
     arrows: false,
-    swipeToSlide: true, // Better for mobile touch
+    swipeToSlide: true,
     responsive: [
-      { 
-        breakpoint: 1280, 
-        settings: { slidesToShow: 3 } 
+      {
+        breakpoint: 1280,
+        settings: { slidesToShow: 3 }
       },
-      { 
-        breakpoint: 1024, 
-        settings: { slidesToShow: 2, dots: true } 
+      {
+        breakpoint: 1024,
+        settings: { slidesToShow: 2 }
       },
-      { 
-        breakpoint: 768, 
-        settings: { slidesToShow: 1, centerMode: true, centerPadding: "20px" } 
+      {
+        breakpoint: 768,
+        settings: { 
+          slidesToShow: 1, 
+          centerMode: true, 
+          centerPadding: "30px" // Shows a peek of next/prev cards
+        }
       },
-      { 
-        breakpoint: 480, 
-        settings: { slidesToShow: 1, centerMode: false, dots: true } 
+      {
+        breakpoint: 480,
+        settings: { 
+          slidesToShow: 1, 
+          centerMode: false, // Prevents squishing on very small screens
+          centerPadding: "0px" 
+        }
       },
     ],
   };
@@ -115,7 +123,7 @@ export default function About() {
       </section>
 
       {/* Feedback Slider */}
-      <section className="relative bg-slate-900/30 border-y border-slate-800 py-20 md:py-32 overflow-hidden">
+      <section className="relative bg-slate-900/30 border-y border-slate-800 py-20 md:py-32">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
@@ -127,12 +135,12 @@ export default function About() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" />
             </div>
           ) : (
-            <div className="mx-[-10px]"> {/* Negative margin to offset slider padding */}
+            <div className="px-2"> 
               <Slider {...sliderSettings} className="feedback-slider custom-dots">
                 {feedbacks.map((fb) => (
-                  <div key={fb._id} className="px-2 md:px-4 py-6">
-                    <div className="bg-slate-950/60 backdrop-blur-md border border-slate-800 p-6 md:p-8 rounded-[2rem] h-full flex flex-col justify-between relative group transition-all duration-300">
-                      <Quote className="absolute top-4 right-6 text-slate-800/50 md:text-slate-800 group-hover:text-sky-500/20 transition-colors" size={32} />
+                  <div key={fb._id} className="px-2 md:px-4 py-4">
+                    <div className="bg-slate-950/60 backdrop-blur-md border border-slate-800 p-6 md:p-8 rounded-[2rem] h-full flex flex-col min-h-[250px] justify-between relative group transition-all duration-300">
+                      <Quote className="absolute top-4 right-6 text-slate-800/50 group-hover:text-sky-500/20 transition-colors" size={32} />
                       
                       <div>
                         <div className="flex items-center gap-3 md:gap-4 mb-4 md:mb-6">
@@ -182,18 +190,32 @@ export default function About() {
         </div>
       </section>
       
-      {/* Small style tweak for slider dots visibility on mobile */}
+      {/* Styles to fix slick height and dot alignment */}
       <style jsx global>{`
+        .custom-dots .slick-dots {
+          bottom: -40px;
+        }
         .custom-dots .slick-dots li button:before {
           color: #38bdf8 !important;
           font-size: 8px;
+          opacity: 0.4;
         }
         .custom-dots .slick-dots li.slick-active button:before {
           color: #38bdf8 !important;
+          opacity: 1;
           font-size: 10px;
         }
-        .feedback-slider .slick-list {
-          overflow: visible;
+        .feedback-slider .slick-track {
+          display: flex !important;
+          align-items: stretch;
+        }
+        .feedback-slider .slick-slide {
+          height: inherit !important;
+          display: flex !important;
+          justify-content: center;
+        }
+        .feedback-slider .slick-slide > div {
+          width: 100%;
         }
       `}</style>
     </main>
