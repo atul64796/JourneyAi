@@ -25,59 +25,77 @@ const generateAccessAndRefreshTokens = async (userId) => {
 };
 
 
+// Register User Controller
 const registerUser = asyncHandler(async (req, res) => {
   const { username, fullName, email, password } = req.body;
+  console.log("Request body:", req.body);
+  console.log("Files:", req.files);
 
-  if (!fullName || !username || !email || !password) {
+  
+  // Fixed validation
+  if ([fullName, username, email, password].some((field) => !field?.trim())) {
     throw new ApiError(400, "All fields are required");
   }
 
+  // Check if user already exists
   const existedUser = await User.findOne({ $or: [{ username }, { email }] });
-  if (existedUser) {
+  if (existedUser)
     throw new ApiError(400, "User with email or username already exists");
-  }
 
+  
   const avatarLocalPath = req.files?.avatar?.[0]?.path;
+  if (!avatarLocalPath) throw new ApiError(400, "Avatar file is required");
+
+
   const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
-  let avatarUrl = "";
-  let coverImageUrl = "";
+  //  Upload avatar
+  const avatarUpload = await uploadOnCloudinary(avatarLocalPath);
+  if (!avatarUpload?.secure_url)
+    throw new ApiError(400, "Avatar upload failed");
 
-  if (avatarLocalPath) {
-    const avatarUpload = await uploadOnCloudinary(avatarLocalPath);
-    avatarUrl = avatarUpload?.secure_url || "";
-  }
+  
+  const coverUpload = coverImageLocalPath
+    ? await uploadOnCloudinary(coverImageLocalPath)
+    : null;
 
-  if (coverImageLocalPath) {
-    const coverUpload = await uploadOnCloudinary(coverImageLocalPath);
-    coverImageUrl = coverUpload?.secure_url || "";
-  }
-
+  // Create user
   const user = await User.create({
     fullName,
     username: username.toLowerCase(),
     email,
     password,
-    avatar: avatarUrl,
-    coverImage: coverImageUrl,
+    avatar: avatarUpload.secure_url,
+    coverImage: coverUpload?.secure_url || "",
   });
 
-  const { accessToken, refreshToken } =
-    await generateAccessAndRefreshTokens(user._id);
+  
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id
+  );
 
+  
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
 
+  if (!createdUser) {
+    throw new ApiError(500, "User registration failed");
+  }
+
+  
   return res.status(201).json(
     new ApiResponse(
       201,
-      { user: createdUser, accessToken, refreshToken },
+      {
+        user: createdUser,
+        accessToken,
+        refreshToken,
+      },
       "User registered successfully"
     )
   );
 });
-
 
 
 

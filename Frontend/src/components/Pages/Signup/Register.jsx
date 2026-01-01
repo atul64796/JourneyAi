@@ -44,8 +44,13 @@ function Register() {
         fd.append("coverImage", formData.coverImage[0]);
       }
 
-      await api.post("/user/register", fd);
-
+     
+      await api.post("/user/register", fd, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          },
+      });
+      
       Swal.fire({
         title: "Success",
         text: "Account created successfully!",
